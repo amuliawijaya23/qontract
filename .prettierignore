@@ -1,0 +1,9 @@
+dist/*
+public/*
+**/out/*
+**/.next/*
+**/node_modules/*
+
+package-lock.json
+yarn.lock
+eslint.config.mjs
