@@ -38,7 +38,7 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
           styles={{
             body: {
               backgroundColor: memoizedValue.palette.background.default,
-              height: '100vh',
+              minHeight: '100vh',
             },
           }}
         />
