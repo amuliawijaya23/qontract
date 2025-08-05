@@ -1,15 +1,12 @@
 import React, { ReactNode } from 'react';
 
-import { useTheme } from '@mui/material/styles';
-import { useMediaQuery } from '@mui/material';
-
 import { useBoolean } from '@/hooks/use-boolean';
 import DesktopNav from './desktop-nav';
 import MobileNav from './mobile-nav';
+import { useResponsive } from '@/hooks/use-responsive';
 
 function Navigation({ children }: { children: ReactNode }) {
-  const theme = useTheme();
-  const isLgUp = useMediaQuery(theme.breakpoints.up('lg'));
+  const isLgUp = useResponsive('up', 'lg');
 
   const isOpen = useBoolean();
 
