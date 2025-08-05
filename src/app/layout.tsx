@@ -1,6 +1,7 @@
 'use client';
 
 import ThemeProvider from '@/theme';
+import Navigation from '@/components/navigation';
 
 export default function RootLayout({
   children,
@@ -10,7 +11,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <Navigation>{children}</Navigation>
+        </ThemeProvider>
       </body>
     </html>
   );
