@@ -1,7 +1,7 @@
 'use client';
 
-import ThemeProvider from '@/theme';
 import Navigation from '@/components/navigation';
+import ThemeProvider from '@/theme';
 import { Box, Paper } from '@mui/material';
 
 export default function RootLayout({
@@ -17,15 +17,17 @@ export default function RootLayout({
             <Box
               component={Paper}
               sx={{
+                minHeight: '100vh',
+                minWidth: '100vw',
                 backgroundColor: (theme) => theme.palette.background.default,
                 backgroundImage: 'none',
                 boxShadow: 'none',
-                overflowY: 'auto',
+                overflowY: 'none',
                 border: 'none',
-                flexGrow: 1,
-                minHeight: 1,
+                borderRadius: 0,
                 display: 'flex',
                 flexDirection: 'column',
+                flexGrow: 1,
                 py: 2,
                 px: 2,
                 scrollbarWidth: 'none',
