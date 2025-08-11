@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useMemo, useState, useCallback } from 'react';
 
 import {
@@ -6,26 +8,27 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Stack,
   Toolbar,
   Typography,
 } from '@mui/material';
 
-import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { useResponsive } from '@/hooks/use-responsive';
+import useForm from '@/hooks/use-forms';
 
-interface IAppToolbar {
-  open: boolean;
-  onOpenSettings: VoidFunction;
-  onToggle: VoidFunction;
-}
+import { auth } from '@/firebase/config';
+import { useAuthState, useSignOut } from 'react-firebase-hooks/auth';
 
-export default function AppToolbar({
-  open,
-  onToggle,
-  onOpenSettings,
-}: IAppToolbar) {
-  const isLgUp = useResponsive('up', 'lg');
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+
+export default function AppToolbar() {
+  const [user] = useAuthState(auth);
+  const [signOut] = useSignOut(auth);
+
+  const { openSettings } = useForm();
+
+  const router = useRouter();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -38,6 +41,12 @@ export default function AppToolbar({
   );
 
   const handleClose = useCallback(() => setAnchorEl(null), []);
+
+  const handleLogin = useCallback(() => router.push('/login'), [router]);
+  const handleRegister = useCallback(() => router.push('/register'), [router]);
+
+  const handleLogout = useCallback(() => signOut(), [signOut]);
+
   return (
     <Toolbar>
       <Box
@@ -49,15 +58,6 @@ export default function AppToolbar({
         }}
         gap={3}
       >
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          onClick={onToggle}
-          edge="start"
-          sx={[isLgUp && open && { display: 'none' }]}
-        >
-          <MenuIcon />
-        </IconButton>
         <Typography variant="h4" noWrap component="div" sx={{ flexGrow: 1 }}>
           QONTRACT
         </Typography>
@@ -67,7 +67,7 @@ export default function AppToolbar({
           size="medium"
           color="inherit"
           edge="end"
-          onClick={onOpenSettings}
+          onClick={openSettings.onTrue}
         >
           <SettingsIcon />
         </IconButton>
@@ -79,7 +79,21 @@ export default function AppToolbar({
           aria-expanded={isOpen ? 'true' : undefined}
           onClick={handleOpen}
         >
-          <Avatar />
+          {user &&
+            (user.photoURL ? (
+              <Avatar>
+                <Image
+                  src={user.photoURL}
+                  alt={user?.displayName || 'Profile-Picture'}
+                  fill
+                />
+              </Avatar>
+            ) : (
+              <Avatar>
+                {user.displayName && user.displayName[0].toUpperCase()}
+              </Avatar>
+            ))}
+          {!user && <Avatar />}
         </IconButton>
         <Menu
           id="profile-menu"
@@ -93,8 +107,18 @@ export default function AppToolbar({
             },
           }}
         >
-          <MenuItem>Login</MenuItem>
-          <MenuItem>Register</MenuItem>
+          {!user && (
+            <Stack>
+              <MenuItem onClick={handleLogin}>Login</MenuItem>
+              <MenuItem onClick={handleRegister}>Register</MenuItem>
+            </Stack>
+          )}
+          {user && (
+            <Stack>
+              <MenuItem>Profile</MenuItem>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            </Stack>
+          )}
         </Menu>
       </Box>
     </Toolbar>

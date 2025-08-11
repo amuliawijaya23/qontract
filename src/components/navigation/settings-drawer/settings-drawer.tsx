@@ -16,15 +16,12 @@ import BaseOptions from './base-option';
 import useThemeStore from '@/hooks/store/use-theme-store';
 import Scrollbar from '@/components/scrollbar';
 
-import { DrawerHeader } from '../desktop-nav/desktop-nav';
+import { DrawerHeader } from '../app-nav/app-nav';
 import { useResponsive } from '@/hooks/use-responsive';
+import useForm from '@/hooks/use-forms';
 
-interface ISettingsDrawer {
-  open: boolean;
-  onClose: VoidFunction;
-}
-
-export default function SettingsDrawer({ open, onClose }: ISettingsDrawer) {
+export default function SettingsDrawer() {
+  const { openSettings } = useForm();
   const settings = useThemeStore();
   const isLgUp = useResponsive('up', 'lg');
 
@@ -52,7 +49,7 @@ export default function SettingsDrawer({ open, onClose }: ISettingsDrawer) {
           </Badge>
         </IconButton>
       </Tooltip>
-      <IconButton onClick={onClose}>
+      <IconButton onClick={openSettings.onFalse}>
         <CloseIcon />
       </IconButton>
     </Stack>
@@ -93,8 +90,8 @@ export default function SettingsDrawer({ open, onClose }: ISettingsDrawer) {
   return (
     <Drawer
       anchor="right"
-      open={open}
-      onClose={onClose}
+      open={openSettings.value}
+      onClose={openSettings.onFalse}
       slotProps={{
         backdrop: { invisible: true },
       }}

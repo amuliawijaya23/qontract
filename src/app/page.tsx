@@ -1,3 +1,7 @@
+import { MainContainer } from '@/components/container';
+import { AppBar } from '@/components/navigation/app-nav/app-nav';
+import AppToolbar from '@/components/navigation/app-toolbar';
+
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -7,8 +11,10 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <div>
-      <main>HOME PAGE</main>
-    </div>
+    <MainContainer maxWidth={false}>
+      <AppBar>
+        <AppToolbar />
+      </AppBar>
+    </MainContainer>
   );
 }

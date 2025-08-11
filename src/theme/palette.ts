@@ -172,6 +172,7 @@ const main = {
 export function palette(mode: 'light' | 'dark') {
   const light = {
     ...main,
+    type: 'light',
     mode: 'light',
     text: {
       black: black[87],
@@ -180,8 +181,8 @@ export function palette(mode: 'light' | 'dark') {
       disabled: grey[700],
     },
     background: {
-      paper: white[100],
-      default: supernova[55],
+      paper: supernova[55],
+      default: white[100],
       menu: black[100],
     },
     action: {
@@ -194,6 +195,7 @@ export function palette(mode: 'light' | 'dark') {
   };
 
   const dark = {
+    type: 'dark',
     mode: 'dark',
     ...main,
     text: {

@@ -1,47 +1,48 @@
 'use client';
 
-import Navigation from '@/components/navigation';
 import ThemeProvider from '@/theme';
-import { Box, Paper } from '@mui/material';
+import FormControl from '@/components/form-control';
+import useThemeStore from '@/hooks/store/use-theme-store';
+import SettingsDrawer from '@/components/navigation/settings-drawer';
+import {
+  AddOrganizationView,
+  OrganizationFormView,
+} from '@/sections/organization-form';
+import NotificationProvider from '@/components/notification';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '@/firebase/config';
+import { LoadingSpinner } from '@/components/loading';
+
+import QueryProvider from '@/components/query-provider/query-provider';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const themeMode = useThemeStore((state) => state.mode);
+
+  const [_user, loading] = useAuthState(auth);
+
   return (
     <html lang="en">
-      <body>
+      <body
+        style={{
+          backgroundColor: themeMode === 'light' ? '#FFFFEA' : '#020617',
+        }}
+      >
         <ThemeProvider>
-          <Navigation>
-            <Box
-              component={Paper}
-              sx={{
-                minHeight: '100vh',
-                minWidth: '100vw',
-                backgroundColor: (theme) => theme.palette.background.default,
-                backgroundImage: 'none',
-                boxShadow: 'none',
-                overflowY: 'none',
-                border: 'none',
-                borderRadius: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                flexGrow: 1,
-                py: 2,
-                px: 2,
-                scrollbarWidth: 'none',
-                '&::-webkit-scrollbar': {
-                  display: 'none',
-                },
-                '&-ms-overflow-style:': {
-                  display: 'none',
-                },
-              }}
-            >
-              {children}
-            </Box>
-          </Navigation>
+          <QueryProvider>
+            <NotificationProvider>
+              <FormControl>
+                {loading && <LoadingSpinner />}
+                {!loading && children}
+                <SettingsDrawer />
+                <AddOrganizationView />
+                <OrganizationFormView />
+              </FormControl>
+            </NotificationProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

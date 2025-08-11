@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useMemo } from 'react';
 
-import { CssBaseline } from '@mui/material';
+import { Box, CssBaseline } from '@mui/material';
 import {
   createTheme,
   ThemeOptions,
@@ -32,7 +32,9 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const memoizedValue = useMemo(
     () => ({
-      palette: { ...palette(themeMode) },
+      palette: {
+        ...palette(themeMode),
+      },
       direction: themeDirection,
       typography,
       breakpoints: {
