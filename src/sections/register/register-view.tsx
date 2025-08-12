@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { enqueueSnackbar } from 'notistack';
 
@@ -20,24 +20,9 @@ import { createRegisterFormSchema } from '@/validator/forms/register-form-schema
 import { useFormik } from 'formik';
 import { FormProvider, FormTextField } from '@/components/formik';
 
-import { auth } from '@/firebase/config';
-import {
-  useCreateUserWithEmailAndPassword,
-  useSignInWithEmailAndPassword,
-  useSignOut,
-  useUpdateProfile,
-} from 'react-firebase-hooks/auth';
+import { useSignUp } from '@/hooks/service/auth';
 
 export default function RegisterView() {
-  const [createUserWithEmailAndPassword, _user, _loading, error] =
-    useCreateUserWithEmailAndPassword(auth);
-
-  const [signInWithEmailAndPassword, _signInUser, _signInLoading, signInError] =
-    useSignInWithEmailAndPassword(auth);
-
-  const [signOut] = useSignOut(auth);
-
-  const [updateProfile] = useUpdateProfile(auth);
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const validation = useMemo(() => createRegisterFormSchema(), []);
@@ -53,36 +38,33 @@ export default function RegisterView() {
     []
   );
 
-  const form = useFormik({
-    initialValues: defaultValues,
-    validationSchema: validation,
-    onSubmit: async (values, { setSubmitting, resetForm }) => {
-      setSubmitting(true);
-      try {
-        const res = await createUserWithEmailAndPassword(
-          values.email,
-          values.password
-        );
-
-        if (res?.user) {
-          await updateProfile({
-            ...res.user,
-            displayName: `${values.firstName}${
-              ` ${values.lastName}` ? values.lastName : ''
-            }`,
-          });
-        }
-
-        resetForm();
-        setSubmitting(false);
-      } catch (err) {
-        console.error(err);
-        setSubmitting(false);
-      }
+  const { mutate: signUp, isPending } = useSignUp({
+    onSuccess: () => {
+      resetForm();
+    },
+    onError: (e) => {
+      enqueueSnackbar({
+        variant: 'error',
+        message: e.message,
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+      });
     },
   });
 
-  const { isSubmitting, resetForm } = form;
+  const form = useFormik({
+    initialValues: defaultValues,
+    validationSchema: validation,
+    onSubmit: async (values) => {
+      await signUp({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
+      });
+    },
+  });
+
+  const { resetForm } = form;
 
   const handleShowPassword = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -92,45 +74,24 @@ export default function RegisterView() {
     []
   );
 
-  useEffect(() => {
-    if (error) {
-      enqueueSnackbar({
-        variant: 'error',
-        message: error.message,
-        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
-      });
-    }
-
-    if (signInError) {
-      enqueueSnackbar({
-        variant: 'error',
-        message: signInError.message,
-        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
-      });
-    }
-
-    return () => {
-      resetForm();
-    };
-  }, [error, resetForm]);
-
   return (
     <Stack>
       <Typography component="h2" variant="h2" sx={{ mb: 1 }}>
         Sign Up
       </Typography>
-
       <FormProvider value={form}>
         <Stack gap={2}>
           <Box sx={{ display: 'flex' }} gap={1}>
             <FormTextField
               required
+              disabled={isPending}
               name="firstName"
               type="text"
               label="First Name"
               sx={{ flex: 1 }}
             />
             <FormTextField
+              disabled={isPending}
               name="lastName"
               type="text"
               label="Last Name"
@@ -140,6 +101,7 @@ export default function RegisterView() {
           <FormTextField required name="email" type="email" label="Email" />
           <FormTextField
             required
+            disabled={isPending}
             name="password"
             type={showPassword ? 'text' : 'password'}
             label="Password"
@@ -164,6 +126,7 @@ export default function RegisterView() {
           />
           <FormTextField
             required
+            disabled={isPending}
             name="confirmPassword"
             type={showPassword ? 'text' : 'password'}
             label="Password"
@@ -195,7 +158,7 @@ export default function RegisterView() {
               variant="contained"
               sx={{ flex: 1 }}
               loadingPosition="start"
-              loading={isSubmitting}
+              loading={isPending}
             >
               Register
             </Button>

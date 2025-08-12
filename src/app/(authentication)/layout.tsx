@@ -3,9 +3,8 @@ import React from 'react';
 
 import { Grid, Paper, Box, Typography, Avatar, Link } from '@mui/material';
 
-import { auth } from '@/firebase/config';
-import { useAuthState } from 'react-firebase-hooks/auth';
 import { redirect } from 'next/navigation';
+import { useAuthStore } from '@/hooks/store';
 
 const Copyright = () => {
   return (
@@ -25,7 +24,7 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [user, loading] = useAuthState(auth);
+  const { user, loading } = useAuthStore();
 
   return (
     <>
@@ -63,7 +62,7 @@ export default function AuthLayout({
                   width: { xs: '100%', md: '80%', xl: '50%' },
                 }}
               >
-                {children}
+                {!loading && children}
               </Box>
               <Copyright />
             </Box>

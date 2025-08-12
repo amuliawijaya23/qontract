@@ -1,19 +1,19 @@
+'use client';
+
 import React, { useCallback } from 'react';
 
 import { Button } from '@mui/material';
 import { Google } from '@mui/icons-material';
-import { useSignInWithGoogle } from 'react-firebase-hooks/auth';
-import { auth } from '@/firebase/config';
+import { signInWithPopup } from 'firebase/auth';
+import { auth, provider } from '@/firebase/config';
 
 export default function LoginWithGoogle() {
-  const [signInWithGoogle] = useSignInWithGoogle(auth);
-
   const handleSignInWithGoogle = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
+    async (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
-      signInWithGoogle();
+      await signInWithPopup(auth, provider);
     },
-    [signInWithGoogle]
+    []
   );
 
   return (

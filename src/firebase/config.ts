@@ -3,6 +3,7 @@ import {
   getAuth,
   setPersistence,
   browserLocalPersistence,
+  GoogleAuthProvider,
 } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -18,6 +19,8 @@ const firebaseConfig = {
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+const provider = new GoogleAuthProvider();
+
 setPersistence(auth, browserLocalPersistence)
   .then(() => {
     console.log('Persistence set to localStorage');
@@ -26,4 +29,4 @@ setPersistence(auth, browserLocalPersistence)
     throw new Error('Error setting persistance: ', error);
   });
 
-export { app, auth };
+export { app, auth, provider };

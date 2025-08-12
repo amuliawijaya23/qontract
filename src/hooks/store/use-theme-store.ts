@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-interface IThemeSettings {
+interface IThemeStore {
   mode: 'dark' | 'light';
   direction: 'rtl' | 'ltr';
   setMode: (mode: 'dark' | 'light') => void;
@@ -8,7 +8,7 @@ interface IThemeSettings {
   reset: () => void;
 }
 
-const useThemeStore = create<IThemeSettings>((set) => ({
+const useThemeStore = create<IThemeStore>((set) => ({
   mode: 'dark',
   direction: 'ltr',
   setMode: (mode) => set({ mode }),

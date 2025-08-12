@@ -16,18 +16,14 @@ import {
 import SettingsIcon from '@mui/icons-material/Settings';
 import useForm from '@/hooks/use-forms';
 
-import { auth } from '@/firebase/config';
-import { useAuthState, useSignOut } from 'react-firebase-hooks/auth';
-
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
+import useAuthStore from '@/hooks/store/use-auth-store';
+
 export default function AppToolbar() {
-  const [user] = useAuthState(auth);
-  const [signOut] = useSignOut(auth);
-
+  const { user, logout } = useAuthStore();
   const { openSettings } = useForm();
-
   const router = useRouter();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -45,7 +41,7 @@ export default function AppToolbar() {
   const handleLogin = useCallback(() => router.push('/login'), [router]);
   const handleRegister = useCallback(() => router.push('/register'), [router]);
 
-  const handleLogout = useCallback(() => signOut(), [signOut]);
+  const handleLogout = useCallback(() => logout(), [logout]);
 
   return (
     <Toolbar>

@@ -9,11 +9,13 @@ import {
   OrganizationFormView,
 } from '@/sections/organization-form';
 import NotificationProvider from '@/components/notification';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/firebase/config';
 import { LoadingSpinner } from '@/components/loading';
 
 import QueryProvider from '@/components/query-provider/query-provider';
+import useAuthStore from '@/hooks/store/use-auth-store';
+import { initAuthListener } from '@/hooks/store/use-auth-store';
+
+import { useEffect } from 'react';
 
 export default function RootLayout({
   children,
@@ -22,7 +24,11 @@ export default function RootLayout({
 }>) {
   const themeMode = useThemeStore((state) => state.mode);
 
-  const [_user, loading] = useAuthState(auth);
+  const { loading } = useAuthStore();
+
+  useEffect(() => {
+    initAuthListener();
+  }, []);
 
   return (
     <html lang="en">

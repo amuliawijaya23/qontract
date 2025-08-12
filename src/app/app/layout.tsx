@@ -3,13 +3,11 @@ import React, { ReactNode } from 'react';
 
 import Navigation from '@/components/navigation';
 
-import { auth } from '@/firebase/config';
-import { useAuthState } from 'react-firebase-hooks/auth';
-
 import { redirect } from 'next/navigation';
+import { useAuthStore } from '@/hooks/store';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  const [user, loading] = useAuthState(auth);
+  const { user, loading } = useAuthStore();
 
   return (
     <>
