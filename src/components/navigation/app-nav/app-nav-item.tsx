@@ -13,7 +13,7 @@ interface IAppNavItem {
   open: boolean;
   title: string;
   icon: ReactElement;
-  onClick: VoidFunction;
+  onClick: (e: React.MouseEvent<HTMLDivElement>) => void | VoidFunction;
 }
 
 export default function AppNavItem({

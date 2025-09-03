@@ -1,28 +1,26 @@
 import { useMemo } from 'react';
 
-import DashboardIcon from '@mui/icons-material/Dashboard';
+import { useAuthStore } from '@/hooks/store';
+import { Avatar } from '@mui/material';
 
 export function useNavigationData() {
+  const organizations = useAuthStore((state) => state.organizations);
+
   const data = useMemo(
-    () => [
-      {
-        items: [
-          {
-            title: 'Dashboard',
-            path: '/app/dashboard',
-            icon: <DashboardIcon />,
-          },
-          // TO Do: Add this when we have doctor dashboard
-          // {
-          //   title: 'Doctors',
-          //   path: '/app/doctor',
-          //   icon: <Iconify icon="fa6-solid:user-doctor" />,
-          // },
-        ],
-      },
-    ],
-    []
+    () =>
+      organizations.length > 0
+        ? organizations.map((org) => ({
+            title: org.name,
+            path: `/app/${org.id}`,
+            logo: org.imageURL ? (
+              <Avatar src={org.imageURL} sx={{ p: 0.5 }} />
+            ) : (
+              <Avatar>{org.name[0]?.toUpperCase() ?? 'A'}</Avatar>
+            ),
+          }))
+        : [],
+    [organizations]
   );
 
-  return data;
+  return { data };
 }

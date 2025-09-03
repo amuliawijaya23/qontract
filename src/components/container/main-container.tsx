@@ -18,31 +18,33 @@ export default function MainContainer({
   action,
 }: IMainContainer) {
   return (
-    <Box>
-      <Stack gap={3}>
-        {(header || subHeader) && (
-          <Stack direction="row">
-            <Box sx={{ flexGrow: 1 }}>
-              {header && (
-                <Typography variant="h2" color="textPrimary">
-                  {header}
-                </Typography>
-              )}
-              {subHeader && (
-                <Typography variant="body1" color="textSecondary">
-                  {subHeader}
-                </Typography>
-              )}
-            </Box>
-            {action && (
-              <Box sx={{ flexShrink: 0 }} gap={1}>
-                {action}
+    <Container maxWidth={maxWidth}>
+      <Box>
+        <Stack gap={3}>
+          {(header || subHeader) && (
+            <Stack direction="row">
+              <Box sx={{ flexGrow: 1 }}>
+                {header && (
+                  <Typography variant="h2" color="textPrimary">
+                    {header}
+                  </Typography>
+                )}
+                {subHeader && (
+                  <Typography variant="body1" color="textSecondary">
+                    {subHeader}
+                  </Typography>
+                )}
               </Box>
-            )}
-          </Stack>
-        )}
-        <Container maxWidth={maxWidth}>{children}</Container>
-      </Stack>
-    </Box>
+              {action && (
+                <Box sx={{ flexShrink: 0 }} gap={1}>
+                  {action}
+                </Box>
+              )}
+            </Stack>
+          )}
+          {children}
+        </Stack>
+      </Box>
+    </Container>
   );
 }

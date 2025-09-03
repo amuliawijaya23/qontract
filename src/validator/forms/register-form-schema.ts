@@ -1,4 +1,4 @@
-import { object, string, ref } from 'yup';
+import { object, string, ref, InferType } from 'yup';
 
 export function createRegisterFormSchema() {
   return object().shape({
@@ -16,3 +16,7 @@ export function createRegisterFormSchema() {
       .required('Required'),
   });
 }
+
+export type IRegisterSchema = InferType<
+  ReturnType<typeof createRegisterFormSchema>
+>;

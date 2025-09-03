@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 
 import { styled, Theme, CSSObject } from '@mui/material/styles';
 import { Box, List, Divider, Paper } from '@mui/material';
@@ -14,6 +14,9 @@ import AppToolbar from '../app-toolbar';
 import AppNavItem from './app-nav-item';
 
 import useForm from '@/hooks/use-forms';
+import { usePathname } from 'next/navigation';
+import { useNavigationData } from '../nav-config';
+import { useRouter } from 'next/navigation';
 
 export const drawerWidth = 240;
 
@@ -105,6 +108,19 @@ interface IAppNav {
 export default function AppNav({ children }: IAppNav) {
   const { openAddOrganizationForm } = useForm();
 
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const { data } = useNavigationData();
+
+  const handleNavOnClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>, path: string) => {
+      e.preventDefault();
+      router.push(path);
+    },
+    [router]
+  );
+
   return (
     <Box
       component={Paper}
@@ -118,21 +134,31 @@ export default function AppNav({ children }: IAppNav) {
       <AppBar position="fixed" open={false}>
         <AppToolbar />
       </AppBar>
-
-      <Drawer variant="permanent" open={false}>
-        <DrawerHeader />
-        <Divider />
-        <List>
-          <>
-            <AppNavItem
-              open={false}
-              title="Add Board"
-              icon={<AddIcon />}
-              onClick={openAddOrganizationForm.onTrue}
-            />
-          </>
-        </List>
-      </Drawer>
+      {pathname.startsWith('/app') && (
+        <Drawer variant="permanent" open={false}>
+          <DrawerHeader />
+          <Divider />
+          <List>
+            <>
+              {data.map((d, index) => (
+                <AppNavItem
+                  key={`nav-organization-${d.title}-${index}`}
+                  open={false}
+                  title={d.title}
+                  icon={d.logo}
+                  onClick={(e) => handleNavOnClick(e, d.path)}
+                />
+              ))}
+              <AppNavItem
+                open={false}
+                title="Add Board"
+                icon={<AddIcon />}
+                onClick={openAddOrganizationForm.onTrue}
+              />
+            </>
+          </List>
+        </Drawer>
+      )}
       <Box
         component="main"
         sx={{

@@ -17,8 +17,8 @@ export default function FormAvatarUpload({
   const [field, meta, { setValue }] = useField(name);
 
   const onDrop = useCallback(
-    (acceptedFiles: File[] | File) => {
-      setValue(acceptedFiles);
+    (acceptedFiles: File[]) => {
+      setValue(acceptedFiles[0]);
     },
     [setValue]
   );
@@ -73,7 +73,7 @@ export default function FormAvatarUpload({
           variant="square"
         >
           <Image
-            src={URL.createObjectURL(field.value[0])}
+            src={URL.createObjectURL(field.value)}
             alt="logo"
             fill
             objectFit="contain"

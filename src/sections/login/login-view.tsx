@@ -14,7 +14,10 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
-import { createLoginFormSchema } from '@/validator/forms/login-form-schema';
+import {
+  createLoginFormSchema,
+  ILoginSchema,
+} from '@/validator/forms/login-form-schema';
 
 import { useFormik } from 'formik';
 import { FormTextField, FormProvider } from '@/components/formik';
@@ -53,8 +56,8 @@ export default function LoginView() {
   const form = useFormik({
     initialValues: defaultValues,
     validationSchema: validation,
-    onSubmit: async (values) => {
-      await signIn({ email: values.email, password: values.password });
+    onSubmit: async (values: ILoginSchema) => {
+      await signIn(values);
     },
   });
 

@@ -4,7 +4,7 @@ import React, { useCallback } from 'react';
 
 import { Button } from '@mui/material';
 import { Google } from '@mui/icons-material';
-import useSignInWithGoogle from '@/hooks/service/auth/use-sign-in-with-google';
+import { useSignInWithGoogle } from '@/hooks/service/auth';
 
 export default function LoginWithGoogle() {
   const { mutate: signInWithGoogle } = useSignInWithGoogle();

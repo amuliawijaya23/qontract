@@ -16,18 +16,23 @@ import {
 import SettingsIcon from '@mui/icons-material/Settings';
 import useForm from '@/hooks/use-forms';
 
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 
-import useAuthStore from '@/hooks/store/use-auth-store';
+import { useAuthStore } from '@/hooks/store';
 
 export default function AppToolbar() {
   const { user, logout } = useAuthStore();
   const { openSettings } = useForm();
   const router = useRouter();
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { organizationId } = useParams();
 
+  const organization = useAuthStore((state) =>
+    state.organizations.find((org) => org.id === organizationId)
+  );
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isOpen = useMemo(() => Boolean(anchorEl), [anchorEl]);
 
   const handleOpen = useCallback(
@@ -54,8 +59,11 @@ export default function AppToolbar() {
         }}
         gap={3}
       >
+        {organization?.imageURL && (
+          <img src={organization.imageURL} width="50px" />
+        )}
         <Typography variant="h4" noWrap component="div" sx={{ flexGrow: 1 }}>
-          QONTRACT
+          {organization?.name ? organization.name.toUpperCase() : 'QONTRACT'}
         </Typography>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center' }} gap={2}>

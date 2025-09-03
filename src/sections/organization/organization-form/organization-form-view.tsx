@@ -8,11 +8,14 @@ import {
   FormProvider,
   FormTextField,
 } from '@/components/formik';
+import FormAddress from '@/components/formik/form-address';
 import FullModal from '@/components/modal/full-modal';
+import useCreateOrganization from '@/hooks/service/organization/use-create-organization';
 import useForm from '@/hooks/use-forms';
 import { createOrganizationFormSchema } from '@/validator/forms/organization-form-schema';
-import { Box, Button, Stack } from '@mui/material';
+import { Button, Stack } from '@mui/material';
 import { useFormik } from 'formik';
+import { enqueueSnackbar } from 'notistack';
 
 import React, { useCallback, useMemo } from 'react';
 
@@ -31,24 +34,55 @@ export default function OrganizationFormView() {
       instagram: '',
       address: {
         fullAddress: '',
+        rt: 0,
+        rw: 0,
         village: '',
         district: '',
         city: '',
         province: '',
         country: 'Indonesia',
-        postalCode: '',
+        postalCode: 0,
       },
     }),
     []
   );
 
+  const { mutate: createOrganization, isPending } = useCreateOrganization({
+    onSuccess: () => {
+      resetForm();
+      enqueueSnackbar({
+        variant: 'success',
+        message: 'Organization successfuly created',
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+      });
+      openOrganizationForm.onFalse();
+    },
+    onError: (e) => {
+      enqueueSnackbar({
+        variant: 'error',
+        message: e.message,
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+      });
+    },
+  });
+
   const form = useFormik({
     validationSchema,
     initialValues,
-    onSubmit: async (values, { setSubmitting }) => {},
+    onSubmit: async (values) => {
+      await createOrganization(values);
+    },
   });
 
-  const { resetForm } = form;
+  const { resetForm, submitForm } = form;
+
+  const handleCreate = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      await submitForm();
+    },
+    [submitForm]
+  );
 
   const handleCancel = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -67,24 +101,41 @@ export default function OrganizationFormView() {
       onClose={openOrganizationForm.onFalse}
       action={
         <>
-          <Button color="error" onClick={handleCancel}>
+          <Button color="error" onClick={handleCancel} disabled={isPending}>
             Cancel
           </Button>
-          <Button>Save</Button>
+          <Button
+            loading={isPending}
+            loadingPosition="start"
+            onClick={handleCreate}
+          >
+            Save
+          </Button>
         </>
       }
     >
-      <MainContainer maxWidth="sm">
-        <FormProvider value={form}>
+      <FormProvider value={form}>
+        <MainContainer maxWidth="sm">
           <Stack gap={3}>
             <CardGroup title="LOGO">
               <FormAvatarUpload name="logo" />
             </CardGroup>
             <CardGroup title="GENERAL">
               <Stack gap={2}>
-                <FormTextField name="name" type="text" label="Name" />
-                <FormTextField name="email" type="email" label="Email" />
+                <FormTextField
+                  disabled={isPending}
+                  name="name"
+                  type="text"
+                  label="Name"
+                />
+                <FormTextField
+                  disabled={isPending}
+                  name="email"
+                  type="email"
+                  label="Email"
+                />
                 <FormPatternFormat
+                  disabled={isPending}
                   name="phoneNumber"
                   label="Phone Number"
                   type="tel"
@@ -93,6 +144,7 @@ export default function OrganizationFormView() {
                   allowEmptyFormatting
                 />
                 <FormPatternFormat
+                  disabled={isPending}
                   name="whatsappNumber"
                   label="WhatsApp Number"
                   type="tel"
@@ -100,56 +152,26 @@ export default function OrganizationFormView() {
                   format="+62 ### #### ####"
                   allowEmptyFormatting
                 />
-                <FormTextField name="websiteUrl" type="url" label="Website" />
-                <FormTextField name="instagram" type="text" label="Instagram" />
+                <FormTextField
+                  disabled={isPending}
+                  name="websiteUrl"
+                  type="url"
+                  label="Website"
+                />
+                <FormTextField
+                  disabled={isPending}
+                  name="instagram"
+                  type="text"
+                  label="Instagram"
+                />
               </Stack>
             </CardGroup>
             <CardGroup title="ADDRESS">
-              <Stack gap={2}>
-                <FormTextField
-                  name="address.country"
-                  type="text"
-                  label="Country"
-                />
-                <FormTextField
-                  name="address.fullAddress"
-                  type="text"
-                  label="Full Address"
-                />
-                <Box sx={{ display: 'flex' }} gap={1}>
-                  <FormTextField name="address.rt" type="number" label="RT" />
-                  <FormTextField name="address.rw" type="number" label="RW" />
-                </Box>
-                <FormTextField
-                  name="address.province"
-                  type="text"
-                  label="Province"
-                />
-                <FormTextField name="city" type="text" label="City" />
-                <Box sx={{ display: 'flex' }} gap={1}>
-                  <FormTextField
-                    name="address.district"
-                    type="text"
-                    label="District"
-                    sx={{ flex: 1 }}
-                  />
-                  <FormTextField
-                    name="address.village"
-                    type="text"
-                    label="Village"
-                    sx={{ flex: 1 }}
-                  />
-                </Box>
-                <FormTextField
-                  name="address.postalCode"
-                  type="text"
-                  label="Postal code"
-                />
-              </Stack>
+              <FormAddress name="address" disabled={isPending} />
             </CardGroup>
           </Stack>
-        </FormProvider>
-      </MainContainer>
+        </MainContainer>
+      </FormProvider>
     </FullModal>
   );
 }

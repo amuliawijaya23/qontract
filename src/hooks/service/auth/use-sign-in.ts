@@ -1,4 +1,6 @@
 import { auth } from '@/firebase/config';
+import { setupPresence } from '@/subscribers/auth';
+import { ILoginSchema } from '@/validator/forms/login-form-schema';
 import { useMutation } from '@tanstack/react-query';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
@@ -9,14 +11,11 @@ interface IUseSignIn {
 
 export default function useSignIn(props?: IUseSignIn) {
   return useMutation({
-    mutationFn: async ({
-      email,
-      password,
-    }: {
-      email: string;
-      password: string;
-    }) => {
+    mutationFn: async ({ email, password }: ILoginSchema) => {
       const response = await signInWithEmailAndPassword(auth, email, password);
+
+      setupPresence(response.user.uid);
+
       return response.user;
     },
     ...props,

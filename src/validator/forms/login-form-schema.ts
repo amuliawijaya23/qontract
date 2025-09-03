@@ -1,4 +1,4 @@
-import { object, string } from 'yup';
+import { InferType, object, string } from 'yup';
 
 export function createLoginFormSchema() {
   return object().shape({
@@ -6,3 +6,5 @@ export function createLoginFormSchema() {
     password: string().required('Required'),
   });
 }
+
+export type ILoginSchema = InferType<ReturnType<typeof createLoginFormSchema>>;

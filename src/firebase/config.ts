@@ -5,6 +5,8 @@ import {
   browserLocalPersistence,
   GoogleAuthProvider,
 } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -18,6 +20,8 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
 const provider = new GoogleAuthProvider();
 
@@ -29,4 +33,4 @@ setPersistence(auth, browserLocalPersistence)
     throw new Error('Error setting persistance: ', error);
   });
 
-export { app, auth, provider };
+export { app, auth, db, storage, provider };

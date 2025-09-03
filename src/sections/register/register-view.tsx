@@ -16,7 +16,10 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Link from 'next/link';
 
-import { createRegisterFormSchema } from '@/validator/forms/register-form-schema';
+import {
+  createRegisterFormSchema,
+  IRegisterSchema,
+} from '@/validator/forms/register-form-schema';
 import { useFormik } from 'formik';
 import { FormProvider, FormTextField } from '@/components/formik';
 
@@ -54,13 +57,8 @@ export default function RegisterView() {
   const form = useFormik({
     initialValues: defaultValues,
     validationSchema: validation,
-    onSubmit: async (values) => {
-      await signUp({
-        firstName: values.firstName,
-        lastName: values.lastName,
-        email: values.email,
-        password: values.password,
-      });
+    onSubmit: async (values: IRegisterSchema) => {
+      await signUp(values);
     },
   });
 

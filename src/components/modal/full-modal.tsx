@@ -1,7 +1,5 @@
 import React, { ReactNode, useEffect, forwardRef } from 'react';
 
-import { useTheme } from '@mui/material/styles';
-
 import {
   Card,
   Stack,
@@ -9,6 +7,7 @@ import {
   IconButton,
   Typography,
   DialogProps,
+  Grid,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
 
@@ -44,7 +43,6 @@ const FullModal = forwardRef(
     }: IFullModal,
     _ref
   ) => {
-    const themeSetting = useTheme();
     useEffect(() => {
       if (open) {
         onAppear?.();
@@ -60,14 +58,16 @@ const FullModal = forwardRef(
         fullScreen
         scroll="body"
         open={open}
-        TransitionComponent={Transition}
-        PaperProps={{
-          sx: {
-            background: (theme) => theme.palette.background.default,
+        slots={{ transition: Transition }}
+        slotProps={{
+          paper: {
+            sx: {
+              background: (theme) => theme.palette.background.default,
+            },
           },
         }}
       >
-        <Stack height="100%">
+        <Stack height="100%" gap={2}>
           <Stack
             sx={{
               paddingX: { xs: 1, md: 3 },
@@ -76,50 +76,45 @@ const FullModal = forwardRef(
             }}
           >
             <Card variant="outlined">
-              <Stack
-                justifyContent="space-between"
-                sx={{
-                  zIndex: themeSetting.zIndex.appBar + 1,
-                  bgcolor: (theme) => theme.palette.background.default,
-                  paddingX: { xs: 1, md: 2 },
-                  paddingY: { xs: 1, md: 2 },
-                }}
-                direction="row"
-                alignItems="center"
-                gap={2}
-              >
-                <Stack>
-                  <Stack flex={1} direction="row" alignItems="center" gap={2}>
-                    <Typography>
-                      <IconButton
-                        onClick={(event) => onClose(event, 'escapeKeyDown')}
-                      >
-                        <Close />
-                      </IconButton>
-                    </Typography>
-                    <Stack flexGrow={1}>
-                      {title && (
-                        <Typography color="text.header" variant="h4">
-                          {title}
-                        </Typography>
-                      )}
-                      {subtitle && (
-                        <Typography variant="body1" color="text.secondary">
-                          {subtitle}
-                        </Typography>
-                      )}
+              <Grid container p={2}>
+                <Grid
+                  size={{ xs: 12 }}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', lg: 'row' },
+                  }}
+                >
+                  <Stack flexGrow={1}>
+                    <Stack flex={1} direction="row" alignItems="center" gap={2}>
+                      <Typography>
+                        <IconButton
+                          onClick={(event) => onClose(event, 'escapeKeyDown')}
+                        >
+                          <Close />
+                        </IconButton>
+                      </Typography>
+                      <Stack flexGrow={1}>
+                        {title && (
+                          <Typography color="text.header" variant="h4">
+                            {title}
+                          </Typography>
+                        )}
+                        {subtitle && (
+                          <Typography variant="body1" color="text.secondary">
+                            {subtitle}
+                          </Typography>
+                        )}
+                      </Stack>
                     </Stack>
                   </Stack>
-                </Stack>
-                <Stack>
-                  {action && (
-                    <Stack direction="row" gap={1}>
-                      {' '}
-                      {action}
-                    </Stack>
-                  )}
-                </Stack>
-              </Stack>
+                  <Stack
+                    direction="row"
+                    sx={{ display: 'flex', justifyContent: 'end' }}
+                  >
+                    {action && action}
+                  </Stack>
+                </Grid>
+              </Grid>
             </Card>
           </Stack>
           <Stack flexGrow={1} sx={{ overflowY: 'auto', p: 2 }}>

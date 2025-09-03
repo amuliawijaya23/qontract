@@ -17,7 +17,7 @@ import useThemeStore from '@/hooks/store/use-theme-store';
 import Scrollbar from '@/components/scrollbar';
 
 import { DrawerHeader } from '../app-nav/app-nav';
-import { useResponsive } from '@/hooks/use-responsive';
+import useResponsive from '@/hooks/use-responsive';
 import useForm from '@/hooks/use-forms';
 
 export default function SettingsDrawer() {

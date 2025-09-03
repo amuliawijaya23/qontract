@@ -1,21 +1,14 @@
 'use client';
 import React, { ReactNode } from 'react';
 
-import Navigation from '@/components/navigation';
-
 import { redirect } from 'next/navigation';
 import { useAuthStore } from '@/hooks/store';
+import useAppData from '@/hooks/use-app-data';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuthStore();
 
-  return (
-    <>
-      {!user && !loading ? (
-        redirect('/login')
-      ) : (
-        <Navigation>{!loading && children}</Navigation>
-      )}
-    </>
-  );
+  useAppData();
+
+  return <>{!user && !loading ? redirect('/login') : !loading && children}</>;
 }

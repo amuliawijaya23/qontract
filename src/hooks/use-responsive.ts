@@ -7,7 +7,7 @@ export type Query = 'up' | 'down' | 'between' | 'only';
 
 export type Value = Breakpoint | number;
 
-export function useResponsive(
+export default function useResponsive(
   query: Query,
   start?: Value,
   end?: Value

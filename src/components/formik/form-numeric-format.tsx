@@ -33,7 +33,7 @@ export default function FormNumericFormat({
   const [field, meta, { setValue }] = useField(name);
 
   const handleChange = useCallback(
-    (value: string) => setValue(value),
+    (value: number) => setValue(value),
     [setValue]
   );
 
@@ -46,7 +46,10 @@ export default function FormNumericFormat({
       {...props}
       customInput={TextField}
       value={field.value}
-      onValueChange={(values) => handleChange(values.formattedValue)}
+      onChange={() => {}}
+      onValueChange={(values) =>
+        values.floatValue ? handleChange(values.floatValue) : handleChange(0)
+      }
       color="secondary"
     />
   );

@@ -1,6 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
-import { auth } from '@/firebase/config';
+import { auth, db } from '@/firebase/config';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { IRegisterSchema } from '@/validator/forms/register-form-schema';
+import { doc, setDoc, Timestamp } from 'firebase/firestore';
+import { setupPresence } from '@/subscribers/auth';
 
 interface IUseSignUp {
   onSuccess?: VoidFunction;
@@ -14,21 +17,28 @@ export default function useSignUp(props?: IUseSignUp) {
       lastName,
       email,
       password,
-    }: {
-      firstName: string;
-      lastName: string;
-      email: string;
-      password: string;
-    }) => {
+    }: IRegisterSchema) => {
+      const now = Timestamp.now();
       const response = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
 
-      await updateProfile(response.user, {
-        displayName: `${firstName}${` ${lastName}` ? lastName : ''}`,
+      const displayName = `${firstName}${` ${lastName}` ? lastName : ''}`;
+      await updateProfile(response.user, { displayName });
+
+      await setDoc(doc(db, 'users', response.user.uid), {
+        displayName,
+        email: response.user.email,
+        photoURL: response.user.photoURL || null,
+        isOnline: true,
+        lastActive: now,
+        createdAt: now,
+        updatedAt: now,
       });
+
+      setupPresence(response.user.uid);
 
       return {
         ...response.user,

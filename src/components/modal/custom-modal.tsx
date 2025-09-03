@@ -19,6 +19,7 @@ import {
 import { Close } from '@mui/icons-material';
 
 import { Transition } from './transition';
+import Scrollbar from '../scrollbar';
 
 export type ICustomModalSizes = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
@@ -123,6 +124,7 @@ const CustomModal = forwardRef(
         maxWidth={size}
         slots={slots}
         slotProps={slotProps}
+        sx={{ overflowY: 'auto' }}
       >
         <Stack bgcolor={themeSetting.palette.background.default} height="100%">
           <Stack
