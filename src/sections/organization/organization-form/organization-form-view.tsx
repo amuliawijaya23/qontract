@@ -1,29 +1,33 @@
 'use client';
 
-import { MainContainer } from '@/components/container';
-import CardGroup from '@/components/container/card-group';
-import {
-  FormAvatarUpload,
-  FormPatternFormat,
-  FormProvider,
-  FormTextField,
-} from '@/components/formik';
-import FormAddress from '@/components/formik/form-address';
-import FullModal from '@/components/modal/full-modal';
-import useCreateOrganization from '@/hooks/service/organization/use-create-organization';
-import useForm from '@/hooks/use-forms';
-import { createOrganizationFormSchema } from '@/validator/forms/organization-form-schema';
+import React, { useCallback, useMemo } from 'react';
 import { Button, Stack } from '@mui/material';
-import { useFormik } from 'formik';
+
+import CardGroup from '@/components/container/card-group';
+import FullModal from '@/components/modal/full-modal';
+import { MainContainer } from '@/components/container';
+
+import useCreateOrganization from '@/hooks/service/organization/use-create-organization';
+import useForms from '@/hooks/use-forms';
+
+import {
+  RHFAddress,
+  RHFAvatarUpload,
+  RHFFormProvider,
+  RHFPatternFormat,
+  RHFTextField,
+} from '@/components/react-hook-form';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+
+import { createOrganizationFormSchema } from '@/validator/forms/organization-form-schema';
 import { enqueueSnackbar } from 'notistack';
 
-import React, { useCallback, useMemo } from 'react';
-
 export default function OrganizationFormView() {
-  const { openOrganizationForm } = useForm();
+  const { openOrganizationForm } = useForms();
   const validationSchema = useMemo(() => createOrganizationFormSchema(), []);
 
-  const initialValues = useMemo(
+  const defaultValues = useMemo(
     () => ({
       logo: undefined,
       name: '',
@@ -47,9 +51,16 @@ export default function OrganizationFormView() {
     []
   );
 
+  const methods = useForm({
+    defaultValues,
+    resolver: yupResolver(validationSchema),
+  });
+
+  const { reset, handleSubmit } = methods;
+
   const { mutate: createOrganization, isPending } = useCreateOrganization({
     onSuccess: () => {
-      resetForm();
+      reset();
       enqueueSnackbar({
         variant: 'success',
         message: 'Organization successfuly created',
@@ -66,31 +77,23 @@ export default function OrganizationFormView() {
     },
   });
 
-  const form = useFormik({
-    validationSchema,
-    initialValues,
-    onSubmit: async (values) => {
-      await createOrganization(values);
-    },
-  });
-
-  const { resetForm, submitForm } = form;
-
   const handleCreate = useCallback(
-    async (e: React.MouseEvent<HTMLButtonElement>) => {
+    (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
-      await submitForm();
+      handleSubmit(async (data) => {
+        await createOrganization(data);
+      })();
     },
-    [submitForm]
+    [handleSubmit, createOrganization]
   );
 
   const handleCancel = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
-      resetForm();
+      reset();
       openOrganizationForm.onFalse();
     },
-    [resetForm, openOrganizationForm]
+    [reset, openOrganizationForm]
   );
 
   return (
@@ -114,27 +117,27 @@ export default function OrganizationFormView() {
         </>
       }
     >
-      <FormProvider value={form}>
+      <RHFFormProvider methods={methods}>
         <MainContainer maxWidth="sm">
           <Stack gap={3}>
             <CardGroup title="LOGO">
-              <FormAvatarUpload name="logo" />
+              <RHFAvatarUpload name="logo" />
             </CardGroup>
             <CardGroup title="GENERAL">
               <Stack gap={2}>
-                <FormTextField
+                <RHFTextField
                   disabled={isPending}
                   name="name"
                   type="text"
                   label="Name"
                 />
-                <FormTextField
+                <RHFTextField
                   disabled={isPending}
                   name="email"
                   type="email"
                   label="Email"
                 />
-                <FormPatternFormat
+                <RHFPatternFormat
                   disabled={isPending}
                   name="phoneNumber"
                   label="Phone Number"
@@ -143,7 +146,7 @@ export default function OrganizationFormView() {
                   format="+62 ### #### ####"
                   allowEmptyFormatting
                 />
-                <FormPatternFormat
+                <RHFPatternFormat
                   disabled={isPending}
                   name="whatsappNumber"
                   label="WhatsApp Number"
@@ -152,13 +155,13 @@ export default function OrganizationFormView() {
                   format="+62 ### #### ####"
                   allowEmptyFormatting
                 />
-                <FormTextField
+                <RHFTextField
                   disabled={isPending}
                   name="websiteUrl"
                   type="url"
                   label="Website"
                 />
-                <FormTextField
+                <RHFTextField
                   disabled={isPending}
                   name="instagram"
                   type="text"
@@ -167,11 +170,11 @@ export default function OrganizationFormView() {
               </Stack>
             </CardGroup>
             <CardGroup title="ADDRESS">
-              <FormAddress name="address" disabled={isPending} />
+              <RHFAddress name="address" disabled={isPending} />
             </CardGroup>
           </Stack>
         </MainContainer>
-      </FormProvider>
+      </RHFFormProvider>
     </FullModal>
   );
 }

@@ -91,9 +91,9 @@ const CustomModal = forwardRef(
               zIndex: 999,
               width: CustomModalSizes[size],
               border: '1px solid',
-              overflow: 'hidden',
               borderColor: themeSetting.palette.background.paper,
               height: { xs: '100%', md: 'auto' },
+              overflow: 'auto',
             }}
           >
             {props.children}
@@ -124,7 +124,9 @@ const CustomModal = forwardRef(
         maxWidth={size}
         slots={slots}
         slotProps={slotProps}
-        sx={{ overflowY: 'auto' }}
+        sx={{
+          overflowY: 'auto',
+        }}
       >
         <Stack bgcolor={themeSetting.palette.background.default} height="100%">
           <Stack
@@ -136,7 +138,7 @@ const CustomModal = forwardRef(
             }}
             direction="row"
             paddingY={2}
-            paddingX={{ xs: 2, sm: 3 }}
+            paddingX={{ xs: 2 }}
             alignItems="center"
           >
             <Stack flex={1} justifyContent="center">
@@ -164,10 +166,11 @@ const CustomModal = forwardRef(
             {...otherChildrenStackProps}
             flexGrow={1}
             py={2}
-            px={3}
+            px={2}
             sx={{
               overflowY: 'auto',
               scrollbarWidth: 0.5,
+              maxHeight: 500,
             }}
           >
             {children}

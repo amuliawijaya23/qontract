@@ -1,8 +1,12 @@
 import { db } from '@/firebase/config';
-import { doc, Timestamp, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, Timestamp, updateDoc } from 'firebase/firestore';
 
 export default async function setupPresence(userId: string) {
   const userRef = doc(db, 'users', userId);
+
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) return;
 
   await updateDoc(userRef, { isOnline: true, lastActive: Timestamp.now() });
 

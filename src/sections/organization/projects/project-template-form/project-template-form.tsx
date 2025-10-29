@@ -1,56 +1,116 @@
-import { CardGroup, CardSubgroup, MainContainer } from '@/components/container';
-import { FormProvider, FormTextField } from '@/components/formik';
-import FormCheckbox from '@/components/formik/form-checkbox';
-import FormSelect from '@/components/formik/form-select';
+import React, { useState, useCallback, useMemo } from 'react';
+
+import { Button, Stack } from '@mui/material';
+
+import { MainContainer } from '@/components/container';
 import FullModal from '@/components/modal/full-modal';
-import useForm from '@/hooks/use-forms';
-import ProjectScopeType from '@/validator/enums/project-scope-type';
+
+import useForms from '@/hooks/use-forms';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { RHFFormProvider } from '@/components/react-hook-form';
+
 import {
   createProjectTemplateFormSchema,
+  createProjectTemplateFormStepSchema,
   IProjectTemplateSchema,
-} from '@/validator/forms/project-template-form-shcema';
-import { Remove } from '@mui/icons-material';
-import { Box, Button, Grid, IconButton, Stack } from '@mui/material';
-import { FieldArray, useFormik } from 'formik';
-import React, { useCallback, useMemo } from 'react';
+} from '@/validator/forms/project-template-form-schema';
+
+import ProjectTemplateDeliverablesForm from './project-template-deliverables-form';
+import ProjectTemplateCostingForm from './project-template-costing-form';
+
+type FieldKeys = 'name' | 'deliverables' | 'costing' | 'quotation';
 
 export default function ProjectTemplateFormView() {
-  const { openProjectTemplateForm } = useForm();
+  const [step, setStep] = useState<number>(0);
+
+  const { openProjectTemplateForm } = useForms();
+
   const validationSchema = useMemo(() => createProjectTemplateFormSchema(), []);
 
-  const initialValues: IProjectTemplateSchema = useMemo(
+  const stepSchema = useMemo(() => createProjectTemplateFormStepSchema(), []);
+
+  const stepFields: FieldKeys[] = useMemo(() => {
+    switch (step) {
+      case 0:
+        return ['name', 'deliverables'];
+
+      case 1:
+        return ['costing'];
+
+      case 2:
+        return ['quotation'];
+
+      default:
+        return [];
+    }
+  }, [step]);
+
+  const defaultValues: IProjectTemplateSchema = useMemo(
     () => ({
       name: '',
-      scope: [
+      deliverables: [
         {
-          name: '',
+          category: '',
+          scopes: [],
+        },
+      ],
+      costing: [
+        {
+          category: '',
+          costs: [
+            // {
+            //   title: '',
+            //   type: CostingType.ABSOLUTE,
+            //   defaultPriceId: '',
+            //   quantityType: QuantityType.STATIC,
+            //   quantity: 0,
+            //   percentage: 0,
+            //   percentageOf: [],
+            //   rules: [],
+            // },
+          ],
+        },
+      ],
+      quotation: [
+        {
           title: '',
-          unit: '',
-          options: [],
-          required: false,
-          type: ProjectScopeType.String,
+          category: '',
         },
       ],
     }),
     []
   );
 
-  const form = useFormik({
-    validationSchema,
-    initialValues,
-    onSubmit: async (values) => {},
+  const methods = useForm({
+    defaultValues,
+    resolver: yupResolver(validationSchema),
   });
 
-  const { values, resetForm, submitForm } = form;
+  const { reset, handleSubmit, trigger } = methods;
+
+  const handleBack = useCallback(() => {
+    setStep((prev) => prev - 1);
+  }, []);
+
+  const handleNext = useCallback(async () => {
+    const isValid = await trigger(stepFields);
+
+    if (isValid) {
+      setStep((prev) => prev + 1);
+    }
+  }, [stepFields, trigger]);
 
   const handleCancel = useCallback(() => {
-    resetForm();
+    reset();
     openProjectTemplateForm.onFalse();
-  }, [openProjectTemplateForm, resetForm]);
+  }, [openProjectTemplateForm, reset]);
 
-  const handleCreate = useCallback(async () => {
-    await submitForm();
-  }, [submitForm]);
+  const handleCreate = useCallback(() => {
+    handleSubmit(async (data) => {
+      console.log(data);
+    });
+  }, [handleSubmit]);
 
   return (
     <FullModal
@@ -60,122 +120,46 @@ export default function ProjectTemplateFormView() {
       onClose={openProjectTemplateForm.onFalse}
       action={
         <>
-          <Button color="error" onClick={handleCancel} disabled={false}>
-            Cancel
-          </Button>
-          <Button
-            loading={false}
-            loadingPosition="start"
-            onClick={handleCreate}
-          >
-            Save
-          </Button>
+          {step === 0 && (
+            <Button color="error" onClick={handleCancel} disabled={false}>
+              Cancel
+            </Button>
+          )}
+          {step > 0 && (
+            <Button onClick={handleBack} disabled={false}>
+              Back
+            </Button>
+          )}
+          {step < stepSchema.length - 1 && (
+            <Button
+              loading={false}
+              loadingPosition="start"
+              onClick={handleNext}
+            >
+              Next
+            </Button>
+          )}
+          {step === stepSchema.length - 1 && (
+            <Button
+              loading={false}
+              loadingPosition="start"
+              onClick={handleCreate}
+            >
+              Save
+            </Button>
+          )}
         </>
       }
     >
-      <FormProvider value={form}>
+      <RHFFormProvider methods={methods}>
         <MainContainer maxWidth="md">
           <Stack gap={3} sx={{ mt: 2 }}>
-            <CardGroup title="Template Name">
-              <FormTextField
-                required
-                name="name"
-                label="Template Name"
-                sx={{ minWidth: '320px' }}
-              />
-            </CardGroup>
-            <FieldArray name="scope">
-              {({ push, remove }) => (
-                <CardGroup
-                  title="Scope"
-                  action={
-                    <Button
-                      onClick={() =>
-                        push({
-                          name: '',
-                          title: '',
-                          unit: '',
-                          options: [],
-                          required: false,
-                          type: 'string',
-                        })
-                      }
-                    >
-                      Add
-                    </Button>
-                  }
-                >
-                  {values.scope.map((s, index) => (
-                    <Grid key={`scope-field-${index}`} container width={1}>
-                      <FormTextField
-                        required
-                        name={`scope[${index}].name`}
-                        label="Field Name"
-                      />
-                      <FormTextField
-                        required
-                        name={`scope[${index}].title`}
-                        label="Field Title"
-                      />
-                      <FormTextField
-                        name={`scope[${index}].unit`}
-                        label="Unit"
-                      />
-                      <FieldArray name={`scope[${index}].options`}>
-                        {({ push: pushOption, remove: removeOption }) => (
-                          <CardSubgroup
-                            key={`scope-options-${index}`}
-                            title="Options"
-                            action={
-                              <Button onClick={() => pushOption('')}>
-                                Add
-                              </Button>
-                            }
-                          >
-                            {values.scope[index].options?.length ? (
-                              values.scope[index].options.map((o, i) => (
-                                <Box key={`scope-${index}-options-${i}`}>
-                                  <FormTextField
-                                    name={`scope[${index}].options[${i}]`}
-                                    label={`Option ${i + 1}`}
-                                  />
-                                  <IconButton onClick={() => removeOption(i)}>
-                                    <Remove />
-                                  </IconButton>
-                                </Box>
-                              ))
-                            ) : (
-                              <></>
-                            )}
-                          </CardSubgroup>
-                        )}
-                      </FieldArray>
-                      <FormCheckbox
-                        name={`scope[${index}].required`}
-                        required
-                        label="Required"
-                      />
-                      <FormSelect
-                        required
-                        name={`scope[${index}].type`}
-                        label="Field Type"
-                        placeholder="String"
-                        options={[
-                          { name: 'String', value: ProjectScopeType.String },
-                          { name: 'Number', value: ProjectScopeType.Number },
-                        ]}
-                      />
-                      <IconButton onClick={() => remove(index)}>
-                        <Remove />
-                      </IconButton>
-                    </Grid>
-                  ))}
-                </CardGroup>
-              )}
-            </FieldArray>
+            {step === 0 && <ProjectTemplateDeliverablesForm />}
+            {step === 1 && <ProjectTemplateCostingForm />}
+            {step === 2 && <></>}
           </Stack>
         </MainContainer>
-      </FormProvider>
+      </RHFFormProvider>
     </FullModal>
   );
 }

@@ -4,11 +4,11 @@ import { createLogoSchema } from './logo-schema';
 
 export function createClientFormSchema() {
   return object().shape({
-    logo: createLogoSchema().optional(),
+    logo: createLogoSchema().optional().nullable(),
     name: string().required('Required'),
     personInCharge: string().required('Required'),
-    email: string().optional(),
-    phoneNumber: string().optional(),
+    email: string().optional().nullable(),
+    phoneNumber: string().optional().nullable(),
     address: createAddressSchema().required('Required'),
   });
 }

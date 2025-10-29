@@ -3,6 +3,8 @@ import React, { useMemo } from 'react';
 import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { IconButton, Tooltip } from '@mui/material';
 
+import moment from 'moment';
+
 import AddIcon from '@mui/icons-material/Add';
 import CustomDataGrid from '@/components/data-grid/custom-data-grid';
 import ActionMenu from '@/components/action-menu';
@@ -11,8 +13,15 @@ import useOrganizationStore, {
 } from '@/hooks/store/use-organization-store';
 import { useParams } from 'next/navigation';
 import { useAuthStore } from '@/hooks/store';
+import useForm from '@/hooks/use-forms';
+import useGetOrganizationMembers from '@/hooks/service/member';
+import { Timestamp } from 'firebase/firestore';
 
-const columns: GridColDef<IUser>[] = [
+const getColumns = ({
+  role,
+}: {
+  role: string | null | undefined;
+}): GridColDef<IUser>[] => [
   {
     field: 'displayName',
     headerName: 'User',
@@ -32,6 +41,10 @@ const columns: GridColDef<IUser>[] = [
     field: 'lastActive',
     headerName: 'Last Active',
     width: 200,
+    valueFormatter: (value: Timestamp | string) =>
+      value === 'Online'
+        ? value
+        : moment(value).format('ddd DD/MM/YYYY hh:mm A'),
   },
   {
     field: 'id',
@@ -44,6 +57,9 @@ const columns: GridColDef<IUser>[] = [
 ];
 
 export default function TeamListView() {
+  const { openInviteForm } = useForm();
+
+  const user = useAuthStore((state) => state.user);
   const organizations = useAuthStore((state) => state.organizations);
 
   const { organizationId } = useParams();
@@ -53,8 +69,19 @@ export default function TeamListView() {
     [organizationId, organizations]
   );
 
-  const loading = useOrganizationStore((state) => state.loading);
+  const userIds = useMemo(
+    () => (organization?.members ? Object.keys(organization.members) : []),
+    [organization?.members]
+  );
+
+  const userRole = useMemo(() => {
+    if (!user?.uid) return null;
+    return organization?.members[user.uid];
+  }, [organization?.members, user?.uid]);
+
   const members = useOrganizationStore((state) => state.members);
+
+  const { isLoading } = useGetOrganizationMembers({ userIds });
 
   const rows = useMemo(
     () =>
@@ -73,18 +100,20 @@ export default function TeamListView() {
     [organization, members]
   );
 
+  const columns = useMemo(() => getColumns({ role: userRole }), [userRole]);
+
   return (
     <CustomDataGrid
       columns={columns}
       rows={rows}
       action={
         <Tooltip title="Invite Member">
-          <IconButton>
+          <IconButton onClick={openInviteForm.onTrue}>
             <AddIcon />
           </IconButton>
         </Tooltip>
       }
-      loading={loading}
+      loading={isLoading}
     />
   );
 }

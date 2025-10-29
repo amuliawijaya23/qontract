@@ -5,10 +5,12 @@ import CustomNoRowsOverlay from '../no-row-overlay';
 
 interface ICustomDataGrid extends DataGridProps {
   action?: React.ReactNode;
+  loading?: boolean;
 }
 
 export default function CustomDataGrid({
   action,
+  loading,
   sx,
   ...props
 }: ICustomDataGrid) {
@@ -26,7 +28,7 @@ export default function CustomDataGrid({
         disableRowSelectionOnClick
         showColumnVerticalBorder
         showCellVerticalBorder
-        loading={false}
+        loading={loading}
         slotProps={{
           loadingOverlay: { variant: 'skeleton', noRowsVariant: 'skeleton' },
         }}

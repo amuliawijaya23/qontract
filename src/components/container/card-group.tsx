@@ -2,10 +2,10 @@
 
 import React, { ReactNode } from 'react';
 
-import { Card, CardHeader, CardContent, Box } from '@mui/material';
+import { Card, CardHeader, CardContent, Box, CardProps } from '@mui/material';
 import useThemeStore from '@/hooks/store/use-theme-store';
 
-interface ICardGroup {
+interface CardGroupProps extends CardProps {
   children: ReactNode;
   title?: string;
   subtitle?: string;
@@ -17,7 +17,7 @@ export default function CardGroup({
   title,
   subtitle,
   action,
-}: ICardGroup) {
+}: CardGroupProps) {
   const themeMode = useThemeStore((state) => state.mode);
 
   return (

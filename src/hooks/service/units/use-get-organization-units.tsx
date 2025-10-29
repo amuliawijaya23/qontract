@@ -1,18 +1,30 @@
 import { useMemo } from 'react';
 import { db } from '@/firebase/config';
 import { useAuthStore } from '@/hooks/store';
-import useOrganizationStore, {
-  IPriceListItem,
-} from '@/hooks/store/use-organization-store';
 import { useQuery } from '@tanstack/react-query';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  query,
+  Timestamp,
+  where,
+} from 'firebase/firestore';
 import { useParams } from 'next/navigation';
 
-export default function useGetOrganizationPriceList() {
+interface IUnit {
+  id: string;
+  unit: string;
+  organizationId: string;
+  active: boolean;
+  createdBy: string;
+  updatedBy: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+export default function useGetOrganizationUnits() {
   const userId = useAuthStore((state) => state.user?.uid);
   const organizations = useAuthStore((state) => state.organizations);
-
-  const setPriceList = useOrganizationStore((state) => state.setPriceList);
 
   const { organizationId } = useParams();
 
@@ -25,23 +37,25 @@ export default function useGetOrganizationPriceList() {
   );
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['price-list', validOrgId],
+    queryKey: ['units', validOrgId],
     queryFn: async () => {
-      const priceListCollection = collection(db, 'price-list');
-      const orgPriceListQuery = query(
-        priceListCollection,
+      const unitsCollection = collection(db, 'units');
+      const unitsQuery = query(
+        unitsCollection,
         where('organizationId', '==', validOrgId)
       );
 
-      const snapshot = await getDocs(orgPriceListQuery);
+      const snapshot = await getDocs(unitsQuery);
 
-      const priceList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as IPriceListItem[];
+      const units = snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as IUnit)
+      );
 
-      setPriceList(priceList);
-      return priceList;
+      return units;
     },
     retry: false,
     enabled: Boolean(userId) && Boolean(validOrgId),

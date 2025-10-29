@@ -13,18 +13,11 @@ import { db } from '@/firebase/config';
 import { useMutation } from '@tanstack/react-query';
 import { IAddOrganizationSchema } from '@/validator/forms/add-organization-form-schema';
 import { useAuthStore } from '@/hooks/store';
+import { IInvitation } from '../member/use-create-invitation';
 
 interface IUseAddOrganization {
   onSuccess?: VoidFunction;
   onError?: (e: Error) => void;
-}
-
-interface IInvitationDoc {
-  id: string;
-  organizationId: string;
-  code: string;
-  role?: string;
-  expiresAt: Timestamp;
 }
 
 export interface IUserOrganization {
@@ -38,7 +31,7 @@ export interface IUserOrganization {
 }
 
 export default function useAddOrganization(props?: IUseAddOrganization) {
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
 
   return useMutation({
     mutationFn: async ({ code }: IAddOrganizationSchema) => {
@@ -56,13 +49,15 @@ export default function useAddOrganization(props?: IUseAddOrganization) {
         if (inviteSnap.empty) throw new Error('Invitation code not found');
 
         const inviteDoc = inviteSnap
-          .docs[0] as QueryDocumentSnapshot<IInvitationDoc>;
+          .docs[0] as QueryDocumentSnapshot<IInvitation>;
 
-        const {
-          organizationId,
-          role = 'member',
-          expiresAt,
-        } = inviteDoc.data() as IInvitationDoc;
+        const { emails, organizationId, role, expiresAt } =
+          inviteDoc.data() as IInvitation;
+
+        if (!emails.includes(user.email || ''))
+          throw new Error(
+            'Invalid Invitation: This invitation is not valid for your account'
+          );
 
         if (!organizationId)
           throw new Error('Invalid invitation: Missing organization id');
@@ -91,6 +86,7 @@ export default function useAddOrganization(props?: IUseAddOrganization) {
           members,
           updatedAt: now,
         });
+        console.log('members:', members);
 
         return {
           id: orgRef.id,

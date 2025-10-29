@@ -4,3 +4,5 @@ export { default as FormNumericFormat } from './form-numeric-format';
 export { default as FormPatternFormat } from './form-pattern-format';
 export { default as FormAvatarUpload } from './form-avatar-upload';
 export { default as FormAddress } from './form-address';
+export { default as FormFormulaBuilder } from './form-formula-builder';
+export { default as FormToggleButton } from './form-toggle-button';

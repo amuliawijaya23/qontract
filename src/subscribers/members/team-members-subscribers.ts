@@ -9,7 +9,7 @@ import {
 
 interface ISubscribeTeamUserOrg {
   userIds: string[];
-  setMembers: () => void;
+  setMembers: () => Promise<void>;
 }
 
 export default function subscribeTeamMembers({

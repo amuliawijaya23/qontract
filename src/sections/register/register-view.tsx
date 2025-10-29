@@ -20,10 +20,11 @@ import {
   createRegisterFormSchema,
   IRegisterSchema,
 } from '@/validator/forms/register-form-schema';
-import { useFormik } from 'formik';
-import { FormProvider, FormTextField } from '@/components/formik';
 
 import { useSignUp } from '@/hooks/service/auth';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { RHFFormProvider, RHFTextField } from '@/components/react-hook-form';
 
 export default function RegisterView() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -41,9 +42,16 @@ export default function RegisterView() {
     []
   );
 
+  const methods = useForm({
+    defaultValues,
+    resolver: yupResolver(validation),
+  });
+
+  const { reset, handleSubmit } = methods;
+
   const { mutate: signUp, isPending } = useSignUp({
     onSuccess: () => {
-      resetForm();
+      reset();
     },
     onError: (e) => {
       enqueueSnackbar({
@@ -54,15 +62,11 @@ export default function RegisterView() {
     },
   });
 
-  const form = useFormik({
-    initialValues: defaultValues,
-    validationSchema: validation,
-    onSubmit: async (values: IRegisterSchema) => {
-      await signUp(values);
-    },
-  });
-
-  const { resetForm } = form;
+  const onSubmit = useCallback(() => {
+    handleSubmit(async (data: IRegisterSchema) => {
+      await signUp(data);
+    })();
+  }, [handleSubmit, signUp]);
 
   const handleShowPassword = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -77,10 +81,10 @@ export default function RegisterView() {
       <Typography component="h2" variant="h2" sx={{ mb: 1 }}>
         Sign Up
       </Typography>
-      <FormProvider value={form}>
+      <RHFFormProvider methods={methods}>
         <Stack gap={2}>
           <Box sx={{ display: 'flex' }} gap={1}>
-            <FormTextField
+            <RHFTextField
               required
               disabled={isPending}
               name="firstName"
@@ -88,7 +92,7 @@ export default function RegisterView() {
               label="First Name"
               sx={{ flex: 1 }}
             />
-            <FormTextField
+            <RHFTextField
               disabled={isPending}
               name="lastName"
               type="text"
@@ -96,8 +100,8 @@ export default function RegisterView() {
               sx={{ flex: 1 }}
             />
           </Box>
-          <FormTextField required name="email" type="email" label="Email" />
-          <FormTextField
+          <RHFTextField required name="email" type="email" label="Email" />
+          <RHFTextField
             required
             disabled={isPending}
             name="password"
@@ -122,7 +126,7 @@ export default function RegisterView() {
               },
             }}
           />
-          <FormTextField
+          <RHFTextField
             required
             disabled={isPending}
             name="confirmPassword"
@@ -157,6 +161,7 @@ export default function RegisterView() {
               sx={{ flex: 1 }}
               loadingPosition="start"
               loading={isPending}
+              onClick={onSubmit}
             >
               Register
             </Button>
@@ -168,7 +173,7 @@ export default function RegisterView() {
             </Link>
           </Typography>
         </Stack>
-      </FormProvider>
+      </RHFFormProvider>
     </Stack>
   );
 }

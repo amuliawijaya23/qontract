@@ -1,27 +1,38 @@
 'use client';
 import React, { useCallback, useMemo } from 'react';
 
-import { FormProvider, FormTextField } from '@/components/formik';
 import CustomModal from '@/components/modal/custom-modal';
-import useForm from '@/hooks/use-forms';
+import useForms from '@/hooks/use-forms';
 import {
   createAddOrganizationFormSchema,
   IAddOrganizationSchema,
 } from '@/validator/forms/add-organization-form-schema';
 import { Button, Divider, Stack, Typography } from '@mui/material';
-import { useFormik } from 'formik';
+
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { RHFFormProvider, RHFTextField } from '@/components/react-hook-form';
+
 import useAddOrganization from '@/hooks/service/organization/use-add-organization';
+
 import { enqueueSnackbar } from 'notistack';
 
 export default function AddOrganizationView() {
-  const { openAddOrganizationForm, openOrganizationForm } = useForm();
+  const { openAddOrganizationForm, openOrganizationForm } = useForms();
   const validationSchema = useMemo(() => createAddOrganizationFormSchema(), []);
 
-  const initialValues = useMemo(() => ({ code: '' }), []);
+  const defaultValues = useMemo(() => ({ code: '' }), []);
+
+  const methods = useForm({
+    defaultValues,
+    resolver: yupResolver(validationSchema),
+  });
+
+  const { reset, handleSubmit } = methods;
 
   const { mutate: addOrganization, isPending } = useAddOrganization({
     onSuccess: () => {
-      resetForm();
+      reset();
       enqueueSnackbar({
         variant: 'success',
         message: 'Organization successfuly added',
@@ -38,45 +49,37 @@ export default function AddOrganizationView() {
     },
   });
 
-  const form = useFormik({
-    validationSchema,
-    initialValues,
-    onSubmit: async (values: IAddOrganizationSchema) => {
-      await addOrganization(values);
-    },
-  });
-
-  const { submitForm, resetForm } = form;
-
   const handleAddOrganization = useCallback(
-    async (e: React.MouseEvent<HTMLButtonElement>) => {
+    (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
-      await submitForm();
+      handleSubmit(async (data: IAddOrganizationSchema) => {
+        await addOrganization(data);
+      })();
     },
-    [submitForm]
+    [handleSubmit, addOrganization]
   );
 
   const handleCreate = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
-      resetForm();
+      reset();
       openAddOrganizationForm.onFalse();
       openOrganizationForm.onTrue();
     },
-    [resetForm, openOrganizationForm, openAddOrganizationForm]
+    [reset, openOrganizationForm, openAddOrganizationForm]
   );
 
   const handleCancel = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
-      resetForm();
+      reset();
       openAddOrganizationForm.onFalse();
     },
-    [openAddOrganizationForm, resetForm]
+    [openAddOrganizationForm, reset]
   );
 
   return (
-    <FormProvider value={form}>
+    <RHFFormProvider methods={methods}>
       <CustomModal
         title="ADD ORGANIZATION"
         subtitle="Create or join and existing Organization"
@@ -102,7 +105,7 @@ export default function AddOrganizationView() {
           <Typography variant="body2" textAlign="center" color="text.secondary">
             Enter an invitation code below to join an existing organization.
           </Typography>
-          <FormTextField
+          <RHFTextField
             fullWidth
             required
             disabled={isPending}
@@ -116,6 +119,6 @@ export default function AddOrganizationView() {
           </Button>
         </Stack>
       </CustomModal>
-    </FormProvider>
+    </RHFFormProvider>
   );
 }

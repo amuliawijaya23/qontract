@@ -1,38 +1,36 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { Box, Button, Stack, Typography } from '@mui/material';
+import FullModal from '@/components/modal/full-modal';
+import { CardGroup, MainContainer } from '@/components/container';
 
-import { useFormik } from 'formik';
-
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import {
   createClientFormSchema,
   IClientSchema,
 } from '@/validator/forms/client-form-schema';
 
-import {
-  FormAvatarUpload,
-  FormPatternFormat,
-  FormProvider,
-  FormTextField,
-  FormAddress,
-} from '@/components/formik';
-
-import FullModal from '@/components/modal/full-modal';
-import { CardGroup, MainContainer } from '@/components/container';
-
 import { useThemeStore } from '@/hooks/store';
-import useForm from '@/hooks/use-forms';
+import useForms from '@/hooks/use-forms';
 import { useCreateClient } from '@/hooks/service/client';
 import { enqueueSnackbar } from 'notistack';
+import {
+  RHFAddress,
+  RHFAvatarUpload,
+  RHFFormProvider,
+  RHFPatternFormat,
+  RHFTextField,
+} from '@/components/react-hook-form';
 
 export default function ClientFormView() {
   const themeMode = useThemeStore((state) => state.mode);
 
-  const { openClientsForm } = useForm();
+  const { openClientsForm } = useForms();
 
   const validationSchema = useMemo(() => createClientFormSchema(), []);
 
-  const initialValues: IClientSchema = useMemo(
+  const defaultValues = useMemo(
     () => ({
       logo: undefined,
       name: '',
@@ -54,12 +52,19 @@ export default function ClientFormView() {
     []
   );
 
+  const methods = useForm({
+    defaultValues,
+    resolver: yupResolver(validationSchema),
+  });
+
+  const { reset, handleSubmit } = methods;
+
   const { mutate: createClient, isPending } = useCreateClient({
     onSuccess: () => {
-      resetForm();
+      reset();
       enqueueSnackbar({
         variant: 'success',
-        message: 'Organization successfuly created',
+        message: 'Client successfuly added',
         anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
       });
       openClientsForm.onFalse();
@@ -73,27 +78,19 @@ export default function ClientFormView() {
     },
   });
 
-  const form = useFormik({
-    validationSchema,
-    initialValues,
-    onSubmit: async (values) => {
-      await createClient(values);
-    },
-  });
-
-  const { resetForm, submitForm } = form;
-
   const handleCancel = useCallback(() => {
-    resetForm();
+    reset();
     openClientsForm.onFalse();
-  }, [openClientsForm, resetForm]);
+  }, [openClientsForm, reset]);
 
   const handleCreate = useCallback(
-    async (e: React.MouseEvent<HTMLButtonElement>) => {
+    (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
-      await submitForm();
+      handleSubmit(async (data: IClientSchema) => {
+        await createClient(data);
+      })();
     },
-    [submitForm]
+    [handleSubmit, createClient]
   );
 
   return (
@@ -117,15 +114,15 @@ export default function ClientFormView() {
         </>
       }
     >
-      <FormProvider value={form}>
+      <RHFFormProvider methods={methods}>
         <MainContainer maxWidth="sm">
           <Stack gap={3}>
             <CardGroup title="Client Logo">
-              <FormAvatarUpload name="logo" />
+              <RHFAvatarUpload name="logo" />
             </CardGroup>
             <CardGroup title="Client Information">
               <Stack gap={4}>
-                <FormTextField
+                <RHFTextField
                   required
                   name="name"
                   label="Client Name"
@@ -138,21 +135,21 @@ export default function ClientFormView() {
                   >
                     Person in Charge
                   </Typography>
-                  <FormTextField
+                  <RHFTextField
                     required
                     name="personInCharge"
                     label="Name"
                     disabled={isPending}
                   />
                   <Box sx={{ display: 'flex' }} gap={2}>
-                    <FormTextField
+                    <RHFTextField
                       name="email"
                       label="Email"
                       disabled={isPending}
                       type="email"
                       sx={{ flex: 1 }}
                     />
-                    <FormPatternFormat
+                    <RHFPatternFormat
                       name="phoneNumber"
                       label="Phone Number"
                       type="tel"
@@ -167,11 +164,11 @@ export default function ClientFormView() {
               </Stack>
             </CardGroup>
             <CardGroup title="Client Address">
-              <FormAddress name="address" disabled={isPending} />
+              <RHFAddress name="address" disabled={isPending} />
             </CardGroup>
           </Stack>
         </MainContainer>
-      </FormProvider>
+      </RHFFormProvider>
     </FullModal>
   );
 }

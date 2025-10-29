@@ -19,6 +19,7 @@ export interface IPriceListItem extends IPriceSchema {
   id: string;
   organizationId: string;
   active: boolean;
+  isDeleted: boolean;
   createdBy: string;
   createdAt: Timestamp;
   updatedBy: string;
@@ -37,11 +38,10 @@ export interface IClient extends Omit<IClientSchema, 'logo'> {
 }
 
 interface IOrganizationStore {
-  loading: boolean;
   members: IUser[];
   priceList: IPriceListItem[];
   clients: IClient[];
-  setLoading: (loading: boolean) => void;
+
   setMembers: (users: IUser[]) => void;
   setPriceList: (priceList: IPriceListItem[]) => void;
   setClients: (clients: IClient[]) => void;
@@ -49,15 +49,14 @@ interface IOrganizationStore {
 }
 
 const useOrganizationStore = create<IOrganizationStore>((set) => ({
-  loading: false,
   members: [],
   priceList: [],
   clients: [],
-  setLoading: (loading) => set({ loading }),
+
   setMembers: (members) => set({ members }),
   setPriceList: (priceList) => set({ priceList }),
   setClients: (clients) => set({ clients }),
-  reset: () => set({ loading: false, members: [], priceList: [], clients: [] }),
+  reset: () => set({ members: [], priceList: [], clients: [] }),
 }));
 
 export default useOrganizationStore;

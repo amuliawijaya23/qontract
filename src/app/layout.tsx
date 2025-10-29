@@ -22,6 +22,7 @@ import { ProjectTemplateFormView } from '@/sections/organization/projects/projec
 import PriceFormView from '@/sections/organization/price-list/price-list-form';
 import { setupPresence } from '@/subscribers/auth';
 import ClientFormView from '@/sections/organization/clients/client-form';
+import { InvitationFormView } from '@/sections/organization/team/team-form';
 
 export default function RootLayout({
   children,
@@ -75,6 +76,7 @@ export default function RootLayout({
                 <ProjectTemplateFormView />
                 <PriceFormView />
                 <ClientFormView />
+                <InvitationFormView />
               </FormControl>
             </NotificationProvider>
           </QueryProvider>

@@ -23,11 +23,13 @@ interface IFormPatternFormat
       | 'size'
     > {
   name: string;
+  showErrorText?: boolean;
 }
 
 export default function FormPatternFormat({
   name,
   helperText,
+  showErrorText,
   ...props
 }: IFormPatternFormat) {
   const [field, meta, { setValue }] = useField(name);
@@ -41,8 +43,8 @@ export default function FormPatternFormat({
     <PatternFormat
       {...field}
       name={name}
-      helperText={meta.touched && meta.error ? meta.error : helperText}
-      error={meta.touched && Boolean(meta.error)}
+      helperText={showErrorText && meta.error ? meta.error : helperText}
+      error={Boolean(meta.error)}
       {...props}
       customInput={TextField}
       value={field.value}

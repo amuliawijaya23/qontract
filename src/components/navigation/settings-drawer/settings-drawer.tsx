@@ -89,7 +89,7 @@ export default function SettingsDrawer() {
 
   return (
     <Drawer
-      anchor="right"
+      anchor={settings.direction === 'ltr' ? 'right' : 'left'}
       open={openSettings.value}
       onClose={openSettings.onFalse}
       slotProps={{

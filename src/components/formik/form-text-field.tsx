@@ -22,6 +22,7 @@ interface IFormikTextField extends FormControlProps {
   slotProps?: TextFieldProps['slotProps'];
   multiline?: boolean;
   minRows?: number;
+  showErrorText?: boolean;
 }
 
 export default function FormTextField({
@@ -36,16 +37,14 @@ export default function FormTextField({
   slotProps,
   disabled = false,
   multiline = false,
+  showErrorText,
   minRows,
   ...formControlProps
 }: IFormikTextField) {
   const [field, meta] = useField(name);
 
   return (
-    <FormControl
-      error={meta.touched && Boolean(meta.error)}
-      {...formControlProps}
-    >
+    <FormControl error={Boolean(meta.error)} {...formControlProps}>
       {label && labelMode === 'static' && (
         <FormLabel required={required} sx={{ mb: 1 }}>
           {label}
@@ -60,8 +59,8 @@ export default function FormTextField({
         label={labelMode === 'inline' ? label : undefined}
         placeholder={placeholder}
         slotProps={slotProps}
-        helperText={meta.touched && meta.error ? meta.error : helperText}
-        error={meta.touched && Boolean(meta.error)}
+        helperText={showErrorText && meta.error ? meta.error : helperText}
+        error={Boolean(meta.error)}
         color="secondary"
         multiline={multiline}
         minRows={minRows}

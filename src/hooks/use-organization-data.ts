@@ -1,21 +1,18 @@
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { useParams } from 'next/navigation';
-import { useAuthStore, useOrganizationStore } from './store';
-
-import { useGetOrganizationPriceList } from './service/price';
-import useGetOrganizationMembers from './service/member';
+import { useAuthStore } from './store';
 
 import subscribePriceList from '@/subscribers/price-list';
 import subscribeTeamMembers from '@/subscribers/members';
-import { useGetOrganizationClients } from './service/client';
 import subscribeClients from '@/subscribers/clients';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function useOrganizationData() {
+  const queryClient = useQueryClient();
+
   const { organizationId } = useParams();
   const organizations = useAuthStore((state) => state.organizations);
-
-  const setLoading = useOrganizationStore((state) => state.setLoading);
 
   const validOrgId = useMemo(
     () =>
@@ -37,23 +34,20 @@ export default function useOrganizationData() {
     [organization?.members]
   );
 
-  const { isLoading: loading1, refetch: refetchPriceList } =
-    useGetOrganizationPriceList();
+  const refetchMembers = useCallback(async () => {
+    await queryClient.refetchQueries({ queryKey: ['members'] });
+  }, [queryClient]);
 
-  const { isLoading: loading2, refetch: refetchMembers } =
-    useGetOrganizationMembers({ userIds });
+  const refetchPriceList = useCallback(async () => {
+    await queryClient.refetchQueries({ queryKey: ['price-list'] });
+  }, [queryClient]);
 
-  const { isLoading: loading3, refetch: refetchClients } =
-    useGetOrganizationClients();
+  const refetchClients = useCallback(async () => {
+    await queryClient.refetchQueries({ queryKey: ['clients'] });
+  }, [queryClient]);
 
   useEffect(() => {
     if (!validOrgId) return;
-
-    if (loading1 || loading2 || loading3) {
-      setLoading(true);
-    } else {
-      setLoading(false);
-    }
 
     const membersUnsubscribe = subscribeTeamMembers({
       userIds,
@@ -71,20 +65,9 @@ export default function useOrganizationData() {
     });
 
     return () => {
-      setLoading(false);
       membersUnsubscribe();
       priceListUnsubscribe();
       clientsUnsubscribe();
     };
-  }, [
-    validOrgId,
-    userIds,
-    loading1,
-    loading2,
-    loading3,
-    setLoading,
-    refetchMembers,
-    refetchPriceList,
-    refetchClients,
-  ]);
+  }, [validOrgId, userIds, refetchMembers, refetchPriceList, refetchClients]);
 }

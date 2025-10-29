@@ -9,8 +9,9 @@ import ActionMenu from '@/components/action-menu';
 import useForm from '@/hooks/use-forms';
 import { useOrganizationStore } from '@/hooks/store';
 import { IClient } from '@/hooks/store/use-organization-store';
+import { useGetOrganizationClients } from '@/hooks/service/client';
 
-const columns: GridColDef<IClient>[] = [
+const getColumns = (): GridColDef<IClient>[] => [
   {
     field: 'name',
     headerName: 'Name',
@@ -60,11 +61,13 @@ const columns: GridColDef<IClient>[] = [
 export default function ClientListView() {
   const { openClientsForm } = useForm();
 
-  const loading = useOrganizationStore((state) => state.loading);
-
   const clients = useOrganizationStore((state) => state.clients);
 
+  const { isLoading } = useGetOrganizationClients();
+
   const rows = useMemo(() => clients, [clients]);
+
+  const columns = useMemo(() => getColumns(), []);
 
   return (
     <CustomDataGrid
@@ -78,7 +81,7 @@ export default function ClientListView() {
         </Tooltip>
       }
       density="comfortable"
-      loading={loading}
+      loading={isLoading}
     />
   );
 }

@@ -17,6 +17,7 @@ import useForm from '@/hooks/use-forms';
 import { usePathname } from 'next/navigation';
 import { useNavigationData } from '../nav-config';
 import { useRouter } from 'next/navigation';
+import { useThemeStore } from '@/hooks/store';
 
 export const drawerWidth = 240;
 
@@ -107,6 +108,7 @@ interface IAppNav {
 
 export default function AppNav({ children }: IAppNav) {
   const { openAddOrganizationForm } = useForm();
+  const settings = useThemeStore();
 
   const router = useRouter();
   const pathname = usePathname();
@@ -135,7 +137,11 @@ export default function AppNav({ children }: IAppNav) {
         <AppToolbar />
       </AppBar>
       {pathname.startsWith('/app') && (
-        <Drawer variant="permanent" open={false}>
+        <Drawer
+          variant="permanent"
+          anchor={settings.direction === 'ltr' ? 'left' : 'right'}
+          open={false}
+        >
           <DrawerHeader />
           <Divider />
           <List>

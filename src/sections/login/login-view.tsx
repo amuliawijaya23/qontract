@@ -19,13 +19,13 @@ import {
   ILoginSchema,
 } from '@/validator/forms/login-form-schema';
 
-import { useFormik } from 'formik';
-import { FormTextField, FormProvider } from '@/components/formik';
-
 import Link from 'next/link';
 import LoginWithGoogle from './login-with-google';
 
 import { useSignIn } from '@/hooks/service/auth';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { RHFFormProvider, RHFTextField } from '@/components/react-hook-form';
 
 export default function LoginView() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -40,9 +40,16 @@ export default function LoginView() {
     []
   );
 
+  const methods = useForm({
+    defaultValues,
+    resolver: yupResolver(validation),
+  });
+
+  const { reset, handleSubmit } = methods;
+
   const { mutate: signIn, isPending } = useSignIn({
     onSuccess: () => {
-      resetForm();
+      reset();
     },
     onError: (e) => {
       enqueueSnackbar({
@@ -53,15 +60,11 @@ export default function LoginView() {
     },
   });
 
-  const form = useFormik({
-    initialValues: defaultValues,
-    validationSchema: validation,
-    onSubmit: async (values: ILoginSchema) => {
-      await signIn(values);
-    },
-  });
-
-  const { resetForm } = form;
+  const onSubmit = useCallback(() => {
+    handleSubmit(async (data: ILoginSchema) => {
+      await signIn(data);
+    })();
+  }, [signIn, handleSubmit]);
 
   const handleShowPassword = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -76,16 +79,16 @@ export default function LoginView() {
       <Typography component="h2" variant="h2" sx={{ mb: 1 }}>
         Sign In
       </Typography>
-      <FormProvider value={form}>
+      <RHFFormProvider methods={methods}>
         <Stack gap={2}>
-          <FormTextField
+          <RHFTextField
             required
             name="email"
             type="email"
             label="Email"
             disabled={isPending}
           />
-          <FormTextField
+          <RHFTextField
             required
             name="password"
             type={showPassword ? 'text' : 'password'}
@@ -120,12 +123,13 @@ export default function LoginView() {
               sx={{ flex: 1 }}
               loading={isPending}
               loadingPosition="start"
+              onClick={onSubmit}
             >
               Login
             </Button>
           </Box>
         </Stack>
-      </FormProvider>
+      </RHFFormProvider>
       <Stack gap={1}>
         <LoginWithGoogle />
         <Typography variant="subtitle1" align="center">

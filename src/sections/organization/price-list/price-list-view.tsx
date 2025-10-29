@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { Box, IconButton, Tooltip, Typography } from '@mui/material';
 import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
@@ -12,8 +12,19 @@ import useForm from '@/hooks/use-forms';
 import useOrganizationStore, {
   IPriceListItem,
 } from '@/hooks/store/use-organization-store';
+import {
+  useGetOrganizationPriceList,
+  useUpdatePriceListItem,
+} from '@/hooks/service/price-list';
+import { enqueueSnackbar } from 'notistack';
 
-const columns: GridColDef<Partial<IPriceListItem>>[] = [
+const getColumns = ({
+  onEdit,
+  onDelete,
+}: {
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+}): GridColDef<Partial<IPriceListItem>>[] => [
   { field: 'name', headerName: 'Name', width: 200 },
   { field: 'brand', headerName: 'Brand', width: 100 },
   { field: 'model', headerName: 'Model', width: 100 },
@@ -51,10 +62,17 @@ const columns: GridColDef<Partial<IPriceListItem>>[] = [
     ),
     width: 150,
   },
+
   {
     field: 'unit',
     headerName: 'Unit',
-    width: 75,
+    width: 50,
+  },
+  {
+    field: 'category',
+    headerName: 'Category',
+    width: 100,
+    align: 'center',
   },
   {
     field: 'createdBy',
@@ -66,17 +84,25 @@ const columns: GridColDef<Partial<IPriceListItem>>[] = [
     headerName: 'Actions',
     width: 75,
     renderCell: (params: GridRenderCellParams) => (
-      <ActionMenu id={params.value} disabled={false} />
+      <ActionMenu
+        status={params.row.active}
+        isDeleted={params.row.isDeleted}
+        id={params.value}
+        disabled={false}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
     ),
   },
 ];
 
 export default function PriceListView() {
-  const { openPriceForm } = useForm();
+  const { handlePriceId, openPriceForm } = useForm();
 
-  const loading = useOrganizationStore((state) => state.loading);
   const members = useOrganizationStore((state) => state.members);
   const priceList = useOrganizationStore((state) => state.priceList);
+
+  const { isLoading } = useGetOrganizationPriceList();
 
   const rows = useMemo(
     () =>
@@ -92,10 +118,53 @@ export default function PriceListView() {
     [priceList, members]
   );
 
+  const { mutate: updatePriceItem, isPending } = useUpdatePriceListItem({
+    onSuccess: () => {
+      enqueueSnackbar({
+        variant: 'success',
+        message: 'Price item successfuly updated',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' },
+      });
+      openPriceForm.onFalse();
+    },
+    onError: (e) => {
+      enqueueSnackbar({
+        variant: 'error',
+        message: e.message,
+        anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
+      });
+    },
+  });
+
+  const handleEdit = useCallback(
+    (id: string) => {
+      handlePriceId(id);
+      openPriceForm.onTrue();
+    },
+    [openPriceForm, handlePriceId]
+  );
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      updatePriceItem({ id, data: { isDeleted: true } });
+    },
+    [updatePriceItem]
+  );
+
+  const columns = useMemo(
+    () =>
+      getColumns({
+        onEdit: handleEdit,
+        onDelete: handleDelete,
+      }),
+    [handleEdit, handleDelete]
+  );
+
   return (
     <CustomDataGrid
       columns={columns}
       rows={rows}
+      loading={isLoading || isPending}
       action={
         <Tooltip title="Add Item">
           <IconButton onClick={openPriceForm.onTrue}>
@@ -103,7 +172,6 @@ export default function PriceListView() {
           </IconButton>
         </Tooltip>
       }
-      loading={loading}
     />
   );
 }
