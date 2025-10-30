@@ -69,19 +69,13 @@ export default function TeamListView() {
     [organizationId, organizations]
   );
 
-  const userIds = useMemo(
-    () => (organization?.members ? Object.keys(organization.members) : []),
-    [organization?.members]
-  );
-
   const userRole = useMemo(() => {
     if (!user?.uid) return null;
     return organization?.members[user.uid];
   }, [organization?.members, user?.uid]);
 
   const members = useOrganizationStore((state) => state.members);
-
-  const { isLoading } = useGetOrganizationMembers({ userIds });
+  const isLoading = useOrganizationStore((state) => state.isLoadingMembers);
 
   const rows = useMemo(
     () =>

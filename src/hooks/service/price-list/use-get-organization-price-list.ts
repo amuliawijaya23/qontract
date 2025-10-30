@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { db } from '@/firebase/config';
 import { useAuthStore } from '@/hooks/store';
 import useOrganizationStore, {
@@ -11,6 +11,9 @@ import { useParams } from 'next/navigation';
 export default function useGetOrganizationPriceList() {
   const userId = useAuthStore((state) => state.user?.uid);
   const organizations = useAuthStore((state) => state.organizations);
+  const setLoading = useOrganizationStore(
+    (state) => state.setIsLoadingPriceList
+  );
 
   const setPriceList = useOrganizationStore((state) => state.setPriceList);
 
@@ -44,9 +47,14 @@ export default function useGetOrganizationPriceList() {
       setPriceList(priceList);
       return priceList;
     },
+
     retry: false,
     enabled: Boolean(userId) && Boolean(validOrgId),
   });
+
+  useEffect(() => {
+    setLoading(isLoading);
+  }, [isLoading, setLoading]);
 
   return {
     data,

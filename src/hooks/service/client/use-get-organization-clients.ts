@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { db } from '@/firebase/config';
 import { useAuthStore } from '@/hooks/store';
 import useOrganizationStore, {
@@ -13,6 +13,7 @@ export default function useGetOrganizationClients() {
   const organizations = useAuthStore((state) => state.organizations);
 
   const setClients = useOrganizationStore((state) => state.setClients);
+  const setLoading = useOrganizationStore((state) => state.setIsLoadingClients);
 
   const { organizationId } = useParams();
 
@@ -40,7 +41,7 @@ export default function useGetOrganizationClients() {
           ({
             id: doc.id,
             ...doc.data(),
-          } as IClient)
+          }) as IClient
       );
 
       setClients(clients);
@@ -49,6 +50,10 @@ export default function useGetOrganizationClients() {
     retry: false,
     enabled: Boolean(userId) && Boolean(validOrgId),
   });
+
+  useEffect(() => {
+    setLoading(isLoading);
+  }, [isLoading, setLoading]);
 
   return {
     data,

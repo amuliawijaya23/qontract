@@ -11,7 +11,7 @@ import {
 import { db } from '@/firebase/config';
 import { useParams } from 'next/navigation';
 import { useAuthStore, useOrganizationStore } from '@/hooks/store';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { IUser } from '@/hooks/store/use-organization-store';
 
 interface IUseGetOrganizationMembers {
@@ -24,6 +24,7 @@ export default function useGetOrganizationMembers({
   const userId = useAuthStore((state) => state.user?.uid);
   const organizations = useAuthStore((state) => state.organizations);
   const setMembers = useOrganizationStore((state) => state.setMembers);
+  const setLoading = useOrganizationStore((state) => state.setIsLoadingMembers);
 
   const { organizationId } = useParams();
 
@@ -50,7 +51,7 @@ export default function useGetOrganizationMembers({
           ({
             id: doc.id,
             ...doc.data(),
-          } as IUser)
+          }) as IUser
       );
 
       setMembers(users);
@@ -59,6 +60,10 @@ export default function useGetOrganizationMembers({
     retry: false,
     enabled: Boolean(userId) && Boolean(validOrgId) && userIds.length > 0,
   });
+
+  useEffect(() => {
+    setLoading(isLoading);
+  }, [isLoading, setLoading]);
 
   return { data, isLoading, error, refetch };
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { useParams } from 'next/navigation';
 import { useAuthStore } from './store';
@@ -6,11 +6,11 @@ import { useAuthStore } from './store';
 import subscribePriceList from '@/subscribers/price-list';
 import subscribeTeamMembers from '@/subscribers/members';
 import subscribeClients from '@/subscribers/clients';
-import { useQueryClient } from '@tanstack/react-query';
+import { useGetOrganizationPriceList } from './service/price-list';
+import useGetOrganizationMembers from './service/member';
+import { useGetOrganizationClients } from './service/client';
 
 export default function useOrganizationData() {
-  const queryClient = useQueryClient();
-
   const { organizationId } = useParams();
   const organizations = useAuthStore((state) => state.organizations);
 
@@ -34,17 +34,9 @@ export default function useOrganizationData() {
     [organization?.members]
   );
 
-  const refetchMembers = useCallback(async () => {
-    await queryClient.refetchQueries({ queryKey: ['members'] });
-  }, [queryClient]);
-
-  const refetchPriceList = useCallback(async () => {
-    await queryClient.refetchQueries({ queryKey: ['price-list'] });
-  }, [queryClient]);
-
-  const refetchClients = useCallback(async () => {
-    await queryClient.refetchQueries({ queryKey: ['clients'] });
-  }, [queryClient]);
+  const { refetch: refetchMembers } = useGetOrganizationMembers({ userIds });
+  const { refetch: refetchPriceList } = useGetOrganizationPriceList();
+  const { refetch: refetchClients } = useGetOrganizationClients();
 
   useEffect(() => {
     if (!validOrgId) return;

@@ -63,7 +63,7 @@ export default function ClientListView() {
 
   const clients = useOrganizationStore((state) => state.clients);
 
-  const { isLoading } = useGetOrganizationClients();
+  const isLoading = useOrganizationStore((state) => state.isLoadingClients);
 
   const rows = useMemo(() => clients, [clients]);
 

@@ -41,10 +41,15 @@ interface IOrganizationStore {
   members: IUser[];
   priceList: IPriceListItem[];
   clients: IClient[];
-
+  isLoadingMembers: boolean;
+  isLoadingPriceList: boolean;
+  isLoadingClients: boolean;
   setMembers: (users: IUser[]) => void;
   setPriceList: (priceList: IPriceListItem[]) => void;
   setClients: (clients: IClient[]) => void;
+  setIsLoadingMembers: (value: boolean) => void;
+  setIsLoadingPriceList: (value: boolean) => void;
+  setIsLoadingClients: (value: boolean) => void;
   reset: VoidFunction;
 }
 
@@ -52,10 +57,15 @@ const useOrganizationStore = create<IOrganizationStore>((set) => ({
   members: [],
   priceList: [],
   clients: [],
-
+  isLoadingMembers: false,
+  isLoadingPriceList: false,
+  isLoadingClients: false,
   setMembers: (members) => set({ members }),
   setPriceList: (priceList) => set({ priceList }),
   setClients: (clients) => set({ clients }),
+  setIsLoadingMembers: (isLoadingMembers) => set({ isLoadingMembers }),
+  setIsLoadingPriceList: (isLoadingPriceList) => set({ isLoadingPriceList }),
+  setIsLoadingClients: (isLoadingClients) => set({ isLoadingClients }),
   reset: () => set({ members: [], priceList: [], clients: [] }),
 }));
 

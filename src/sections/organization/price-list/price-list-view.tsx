@@ -12,10 +12,7 @@ import useForm from '@/hooks/use-forms';
 import useOrganizationStore, {
   IPriceListItem,
 } from '@/hooks/store/use-organization-store';
-import {
-  useGetOrganizationPriceList,
-  useUpdatePriceListItem,
-} from '@/hooks/service/price-list';
+import { useUpdatePriceListItem } from '@/hooks/service/price-list';
 import { enqueueSnackbar } from 'notistack';
 
 const getColumns = ({
@@ -101,8 +98,7 @@ export default function PriceListView() {
 
   const members = useOrganizationStore((state) => state.members);
   const priceList = useOrganizationStore((state) => state.priceList);
-
-  const { isLoading } = useGetOrganizationPriceList();
+  const isLoading = useOrganizationStore((state) => state.isLoadingPriceList);
 
   const rows = useMemo(
     () =>
