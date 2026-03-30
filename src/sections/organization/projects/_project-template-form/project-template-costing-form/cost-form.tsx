@@ -43,6 +43,7 @@ import {
 } from 'react-hook-form';
 import ProjectScopeType from '@/validator/enums/project-scope-type';
 import OperatorType from '@/validator/enums/operator-type';
+import CostOverrideForm from './cost-override-form';
 
 type IOption = {
   name: string;
@@ -53,7 +54,6 @@ type CostFormProps = {
   open: boolean;
   selected: ICostSchema | null;
   index: number | null;
-  categories: IOption[];
   onClose: VoidFunction;
   onAppend: (data: ICostSchema) => void;
   onUpdate: (index: number, data: ICostSchema) => void;
@@ -63,7 +63,6 @@ export default function CostForm({
   open,
   selected,
   index,
-  categories,
   onClose,
   onAppend,
   onUpdate,
@@ -79,22 +78,17 @@ export default function CostForm({
       selected
         ? {
             title: selected.title,
-            type: selected.type,
             defaultPriceId: selected.defaultPriceId,
             quantityType: selected.quantityType,
             quantity: selected.quantity,
-            percentage: selected.percentage,
-            percentageOf: selected.percentageOf,
             rules: selected.rules,
           }
         : {
             title: '',
-            type: CostingType.ABSOLUTE,
+
             defaultPriceId: '',
             quantityType: QuantityType.STATIC,
             quantity: 0,
-            percentage: 0,
-            percentageOf: [],
             rules: [],
           },
     [selected]
@@ -160,7 +154,6 @@ export default function CostForm({
 
   const values = watch();
 
-  const type = useWatch({ control, name: 'type' });
   const quantityType = useWatch({ control, name: 'quantityType' });
 
   const priceListOptions = useMemo(
@@ -172,14 +165,6 @@ export default function CostForm({
         }${p.description ? ` - ${p.description}` : ''}`,
       })),
     [priceList]
-  );
-
-  const costTypeOptions = useMemo(
-    () => [
-      { name: 'Absolute', value: CostingType.ABSOLUTE },
-      { name: 'Percentage', value: CostingType.PERCENTAGE },
-    ],
-    []
   );
 
   const quantityTypeOptions = useMemo(
@@ -216,15 +201,6 @@ export default function CostForm({
   );
 
   useEffect(() => {
-    if (type === CostingType.ABSOLUTE) {
-      setValue('percentage', 0);
-      setValue('percentageOf', []);
-    }
-
-    if (type === CostingType.PERCENTAGE) {
-      setValue('defaultPriceId', '');
-    }
-
     if (quantityType === QuantityType.STATIC) {
       setValue('quantity', 0);
     }
@@ -236,7 +212,7 @@ export default function CostForm({
     if (!enableOverrides) {
       setValue('rules', []);
     }
-  }, [type, quantityType, enableOverrides, setValue]);
+  }, [quantityType, enableOverrides, setValue]);
 
   return (
     <CustomModal
@@ -254,40 +230,22 @@ export default function CostForm({
       <RHFFormProvider methods={methods}>
         <Stack gap={2}>
           <RHFTextField name="title" label="Title" sx={{ width: 320 }} />
-          <Divider />
-          <Typography variant="h4">PRICING</Typography>
-          <RHFToggleButton name="type" options={costTypeOptions} />
-          {type === CostingType.ABSOLUTE && (
-            <RHFAutocomplete
-              name="defaultPriceId"
-              label="Default Price Item"
-              options={priceListOptions}
-            />
-          )}
-          {type === CostingType.PERCENTAGE && (
-            <>
-              <RHFNumericFormat
-                name="percentage"
-                label="Percentage"
-                suffix=" %"
-                sx={{ width: 320 }}
-              />
-              <RHFSelect
-                name="percentageOf"
-                label="Percentage Of"
-                options={categories}
-                multiple
-              />
-            </>
-          )}
+          <RHFAutocomplete
+            name="defaultPriceId"
+            label="Default Price Item"
+            options={priceListOptions}
+          />
           <Divider />
           <Typography variant="h4">QUANTITY</Typography>
-          <RHFToggleButton
-            name="quantityType"
-            options={quantityTypeOptions}
-            buttonWidth={100}
-          />
-          {quantityType == QuantityType.STATIC ? (
+          {formulaScopeFieldOptions.length > 0 && (
+            <RHFToggleButton
+              name="quantityType"
+              options={quantityTypeOptions}
+              buttonWidth={100}
+            />
+          )}
+          {quantityType == QuantityType.STATIC ||
+          formulaScopeFieldOptions.length === 0 ? (
             <RHFTextField
               name="quantity"
               label="Quantity"
@@ -327,9 +285,13 @@ export default function CostForm({
                   </Tooltip>
                 </Box>
               </Box>
-              {/* {overrides.map((_, i) => (
-                
-              ))} */}
+              {overrides.map((_, i) => (
+                <CostOverrideForm
+                  key={`costing-${index}-cost-${i}-Override-Form`}
+                  index={i}
+                  onRemove={removeRule}
+                />
+              ))}
             </>
           )}
         </Stack>

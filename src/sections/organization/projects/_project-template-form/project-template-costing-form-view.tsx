@@ -225,7 +225,7 @@ export default function ProjectTemplateCostingFormView() {
                                   ]}
                                   buttonWidth={100}
                                 />
-                                {values.costing[index].costs[cIdx].type ===
+                                {/* {values.costing[index].costs[cIdx].type ===
                                   CostingType.ABSOLUTE && (
                                   <FormAutocomplete
                                     name={`costing[${index}].costs[${cIdx}].defaultPriceId`}
@@ -250,7 +250,7 @@ export default function ProjectTemplateCostingFormView() {
                                       multiple
                                     />
                                   </>
-                                )}
+                                )} */}
                               </Stack>
                             </CardContent>
                             <CardHeader

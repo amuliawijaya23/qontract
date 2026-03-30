@@ -20,6 +20,7 @@ import {
 
 import { useBoolean } from '@/hooks';
 import CostForm from './cost-form';
+import useProjectTemplateFormContext from '../hook';
 
 type CostingFormProps = {
   index: number;
@@ -27,7 +28,7 @@ type CostingFormProps = {
 };
 
 export default function CostingForm({ index, onRemove }: CostingFormProps) {
-  const openCostForm = useBoolean();
+  const { openCostForm } = useProjectTemplateFormContext();
 
   const [selectedIndex, setSelectedIndex] = useState<null | number>(null);
 
@@ -72,20 +73,9 @@ export default function CostingForm({ index, onRemove }: CostingFormProps) {
     setSelectedIndex(null);
   }, [openCostForm]);
 
-  const costing = useWatch({ control, name: 'costing' });
-
   const selected = useMemo(
     () => (selectedIndex !== null ? fields[selectedIndex] : null),
     [fields, selectedIndex]
-  );
-
-  const percentageOfOptions = useMemo(
-    () =>
-      costing.map((c) => ({
-        name: c.category,
-        value: c.category,
-      })),
-    [costing]
   );
 
   const costsError = useMemo(
@@ -94,52 +84,41 @@ export default function CostingForm({ index, onRemove }: CostingFormProps) {
   );
 
   return (
-    <>
-      <CostForm
-        open={openCostForm.value}
-        selected={selected}
-        index={selectedIndex}
-        categories={percentageOfOptions}
-        onClose={handleCloseForm}
-        onAppend={handleAddCost}
-        onUpdate={handleUpdateCost}
-      />
-      <Card>
-        <CardContent
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <RHFTextField
-            required
-            name={`costing[${index}].category`}
-            label="Category"
-            sx={{ width: 320 }}
-          />
-          <Box>
-            <Tooltip title="Remove Deliverable">
-              <IconButton onClick={handleRemove}>
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </CardContent>
-        <CardContent>
-          <Card variant="outlined">
-            <Button
-              color={costsError && !fields.length ? 'error' : 'primary'}
-              fullWidth
-              variant="outlined"
-              sx={{ p: 2 }}
-              onClick={openCostForm.onTrue}
-            >
-              <AddIcon />
-            </Button>
-          </Card>
-        </CardContent>
-      </Card>
-    </>
+    <Card>
+      <CardContent
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <RHFTextField
+          required
+          name={`costing[${index}].category`}
+          label="Category"
+          sx={{ width: 320 }}
+        />
+        <Box>
+          <Tooltip title="Remove Deliverable">
+            <IconButton onClick={handleRemove}>
+              <CloseIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </CardContent>
+      <CardContent>
+        <Card variant="outlined">
+          <Button
+            color={costsError && !fields.length ? 'error' : 'primary'}
+            fullWidth
+            variant="outlined"
+            sx={{ p: 2 }}
+            onClick={openCostForm.onTrue}
+          >
+            <AddIcon />
+          </Button>
+        </Card>
+      </CardContent>
+    </Card>
   );
 }

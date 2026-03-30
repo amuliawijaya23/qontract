@@ -24,7 +24,7 @@ export default function RHFFormulaBuilder({
   const { setValue } = useFormContext();
 
   const [wrapper, setWrapper] = useState('');
-  const [leftOperand, setLeftOperand] = useState(scopeFields[0].value || '');
+  const [leftOperand, setLeftOperand] = useState(scopeFields[0]?.value || '');
   const [operator, setOperator] = useState('/');
   const [rightOperand, setRightOperand] = useState(1);
 

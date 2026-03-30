@@ -86,12 +86,7 @@ function createRulesSchema() {
 export function createProjectCostSchema() {
   return object().shape({
     title: string().required('Required'),
-    type: string().oneOf(Object.values(CostingType)).required('Required'),
-    defaultPriceId: mixed().when('type', {
-      is: (v: CostingType) => v === CostingType.ABSOLUTE,
-      then: () => string().required('Required'),
-      otherwise: () => mixed().notRequired(),
-    }),
+    defaultPriceId: string().required('Required'),
     quantityType: string()
       .oneOf(Object.values(QuantityType))
       .required('Required')
@@ -107,20 +102,6 @@ export function createProjectCostSchema() {
             .required('Required'),
       })
       .required('Required'),
-    percentage: mixed().when('type', {
-      is: (v: CostingType) => v === CostingType.PERCENTAGE,
-      then: () =>
-        number()
-          .min(0, 'Must be positive')
-          .max(100, 'Cannot exceed 100%')
-          .required('Required'),
-      otherwise: () => mixed().notRequired(),
-    }),
-    percentageOf: mixed().when('type', {
-      is: (v: CostingType) => v === CostingType.PERCENTAGE,
-      then: () => array(string()).min(1, 'Select at least one category'),
-      otherwise: () => mixed().notRequired(),
-    }),
     rules: array(createRulesSchema()).optional(),
   });
 }

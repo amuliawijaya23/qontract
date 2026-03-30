@@ -12,19 +12,20 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 
-import { Control, useFieldArray, useFormContext } from 'react-hook-form';
+import { useFieldArray, useFormContext } from 'react-hook-form';
+import CostConditionForm from './cost-condition-form';
 
 type CostOverrideFormProps = {
-  control: Control;
   index: number;
   onRemove: (index: number) => void;
 };
 
 export default function CostOverrideForm({
-  control,
   index,
   onRemove,
 }: CostOverrideFormProps) {
+  const { control, watch } = useFormContext();
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: `rules.${index}.conditions`,
@@ -42,6 +43,9 @@ export default function CostOverrideForm({
       value: '',
     });
   }, [append]);
+
+  const values = watch();
+  console.log('VAL: ', values);
 
   return (
     <Card>
@@ -66,6 +70,12 @@ export default function CostOverrideForm({
               </Tooltip>
             </Box>
           </Box>
+          {fields.map((_, i) => (
+            <CostConditionForm
+              key={`costing-${index}-condition-${i}`}
+              index={i}
+            />
+          ))}
         </Stack>
       </CardContent>
     </Card>
