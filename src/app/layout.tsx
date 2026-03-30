@@ -18,7 +18,8 @@ import { initAuthListener } from '@/hooks/store/use-auth-store';
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Navigation from '@/components/navigation';
-import { ProjectTemplateFormView } from '@/sections/organization/projects/project-template-form';
+// import ProjectTemplateForm from '@/sections/organization/projects/project-template-form';
+import { ProjectTemplateForm } from '@/sections/organization/projects/project-template-form';
 import PriceFormView from '@/sections/organization/price-list/price-list-form';
 import { setupPresence } from '@/subscribers/auth';
 import ClientFormView from '@/sections/organization/clients/client-form';
@@ -73,7 +74,7 @@ export default function RootLayout({
                 <SettingsDrawer />
                 <AddOrganizationView />
                 <OrganizationFormView />
-                <ProjectTemplateFormView />
+                <ProjectTemplateForm />
                 <PriceFormView />
                 <ClientFormView />
                 <InvitationFormView />

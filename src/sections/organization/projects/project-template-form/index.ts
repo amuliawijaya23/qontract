@@ -1,1 +1,1 @@
-export { default as ProjectTemplateFormView } from './project-template-form';
+export { default as ProjectTemplateForm } from './project-template-form';
